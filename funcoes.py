@@ -11,7 +11,6 @@ class Configuracao:
     """
 
     def __init__(self, arr):
-
         msg = "Tua configuração deve ter 9 posições"
 
         self.config = np.array(arr, dtype=int)
@@ -32,14 +31,14 @@ class Configuracao:
     def desencolhe(self):
         """Faz com que a representação da configuração fique desencolhida."""
         self.esta_encolhido = False
-        self.config = self.config.reshape(3,3)
+        self.config = self.config.reshape(3, 3)
         return self.config
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """Só para testarmos, depois deletamos isso aqui"""
 
-    conf_lista = [0,0,1,2,0,0,1,0,0]
+    conf_lista = [0, 0, 1, 2, 0, 0, 1, 0, 0]
 
     conf_classe = Configuracao(conf_lista)
     print(conf_classe.encolhe())
