@@ -8,7 +8,7 @@ ALL_SYMMETRY_OP = {
     "id": lambda x: x,
     "rot90": np.rot90,
     "rot180": partial(np.rot90, k=2),
-    "rot270": partial(np.rot90, k=3),
+    # "rot270": partial(np.rot90, k=3),  # precisa desse?
     "flipv": np.fliplr,
     "fliph": np.flipud,
     "flipds": lambda x: np.fliplr(np.rot90(x)),
@@ -20,7 +20,7 @@ ALL_SYMMETRY_OP_INV = {
     "id": lambda x: x,
     "rot90": partial(np.rot90, k=-1),
     "rot180": partial(np.rot90, k=-2),
-    "rot270": partial(np.rot90, k=-3),
+    # "rot270": partial(np.rot90, k=-3),
     "flipv": np.fliplr,
     "fliph": np.flipud,
     "flipds": lambda x: np.fliplr(np.rot90(x)),
@@ -62,13 +62,14 @@ class Configuracao:
 
     def symmetry_dict(self):
         """Gera o conjunto de simetrias."""
-        symmetries = {}
-        self.desencolhe()
-        for name, op in ALL_SYMMETRY_OP.items():
-            id_ = "".join(str(num) for num in op(self.config).ravel())
-            symmetries[name] = id_
-        self.symmetries = symmetries
-        return symmetries
+        if not hasattr(self, "symmetries"):
+            symmetries = {}
+            self.desencolhe()
+            for name, op in ALL_SYMMETRY_OP.items():
+                id_ = "".join(str(num) for num in op(self.config).ravel())
+                symmetries[name] = id_
+            self.symmetries = symmetries
+        return self.symmetries
 
     def get_symmetry_id(self):
         """O ID oficial da config. é a string da primeira posição do sorted."""
@@ -81,6 +82,40 @@ class Configuracao:
         ][0]
         return self.id_
 
+    def symmetry_map(self):
+        """Computa o mapa de simetria. Números iguais representam mesma jogada."""
+        self.symmetry_dict()
+        mapa = (np.arange(9) + 1).reshape(3, 3)
+
+        base = self.symmetries["id"]
+
+        if base == self.symmetries["fliph"]:
+            mapa[2, :] = mapa[0, :]
+        if base == self.symmetries["flipv"]:
+            mapa[:, 2] = mapa[:, 0]
+        if base == self.symmetries["flipdp"]:
+            mapa[1, 0] = mapa[0, 1]
+            mapa[2, 0] = mapa[0, 2]
+            mapa[2, 1] = mapa[1, 2]
+        if base == self.symmetries["flipds"]:
+            mapa[1, 2] = mapa[0, 1]
+            mapa[2, 2] = mapa[0, 0]
+            mapa[2, 1] = mapa[1, 0]
+        if base == self.symmetries["rot90"]:
+            mapa[0, 0] = mapa[0, 2] = mapa[2, 0] = mapa[2, 2] = 1
+            mapa[0, 1] = mapa[1, 0] = mapa[1, 2] = mapa[2, 1] = 2
+        if base == self.symmetries["rot180"]:
+            mapa[2, 1] = mapa[0, 1]
+            mapa[1, 2] = mapa[1, 0]
+            mapa[2, 2] = mapa[0, 0]
+            mapa[2, 0] = mapa[0, 2]
+
+        # jogadas proibidas tem número -1
+        logic = self.config > 0
+        mapa[logic] = -1
+
+        return mapa
+
 
 if __name__ == "__main__":
     """Só para testarmos, depois deletamos isso aqui"""
@@ -88,7 +123,19 @@ if __name__ == "__main__":
     from pprint import pprint
 
     conf_lista = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    conf_lista = [1, 0, 0, 1, 1, 1, 0, 0, 0]
+    conf_lista = [1, 0, 0, 0, 0, 0, 0, 0, 0]
+    conf_lista = [0, 1, 0, 0, 0, 0, 0, 0, 0]
+    conf_lista = [0, 0, 1, 0, 0, 0, 0, 0, 0]
+    conf_lista = [0, 0, 0, 1, 0, 0, 0, 0, 0]
+    conf_lista = [0, 0, 0, 0, 1, 0, 0, 0, 0]
+    conf_lista = [0, 0, 0, 0, 0, 1, 0, 0, 0]
+    conf_lista = [0, 0, 0, 0, 0, 0, 1, 0, 0]
+    conf_lista = [0, 0, 0, 0, 0, 0, 0, 1, 0]
+    conf_lista = [0, 0, 0, 0, 0, 0, 0, 0, 1]
+    conf_lista = [1, 0, 2, 0, 0, 0, 0, 0, 0]
+    conf_lista = [0, 1, 0, 0, 0, 0, 0, 2, 0]
+    conf_lista = [0, 0, 1, 0, 0, 0, 2, 0, 0]
+    conf_lista = [0, 2, 0, 2, 1, 1, 0, 1, 0]
 
     jogo = Configuracao(conf_lista)
 
@@ -114,3 +161,7 @@ if __name__ == "__main__":
             print()
             print(treat)
             print()
+
+    print()
+    print(jogo.config)
+    print(jogo.symmetry_map())
