@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 from functools import partial
 
 
@@ -34,11 +35,15 @@ class Configuracao:
     Args:
       arr:
         Numpy array de representando o jogo. Pode ser a representação em grade
-        3x3 ou em vetor linha, tanto faz.
+        3x3 ou em vetor linha, tanto faz. Pode ser também a representação em
+        string da configuração.
     """
 
     def __init__(self, arr):
-        self.config = np.array(arr, dtype=int)
+        if isinstance(arr, str):
+            self.config = np.array(list(arr), dtype=int)
+        else:
+            self.config = np.array(arr, dtype=int)
 
         msg = "Tua configuração deve ter 9 posições"
         assert len(self.config.ravel() == 9), msg
@@ -116,6 +121,36 @@ class Configuracao:
 
         return mapa
 
+    def check_vitoria_1(self):
+        """Checa se jogador 1 ganhou."""
+        self.desencolhe()
+        jogador = 1
+        logic = self.config == jogador
+        if (
+            3 in logic.sum(axis=0)
+            or 3 in logic.sum(axis=1)
+            or np.trace(logic) == 3
+            or np.trace(np.fliplr(logic)) == 3
+        ):
+            return True
+        else:
+            return False
+
+    def check_vitoria_2(self):
+        """Checa se jogador 2 ganhou."""
+        self.desencolhe()
+        jogador = 2
+        logic = self.config == jogador
+        if (
+            3 in logic.sum(axis=0)
+            or 3 in logic.sum(axis=1)
+            or np.trace(logic) == 3
+            or np.trace(np.fliplr(logic)) == 3
+        ):
+            return True
+        else:
+            return False
+
 
 if __name__ == "__main__":
     """Só para testarmos, depois deletamos isso aqui"""
@@ -165,3 +200,30 @@ if __name__ == "__main__":
     print()
     print(jogo.config)
     print(jogo.symmetry_map())
+
+
+# listando todos os jogos únicos onde o jogador 1 deve fazer um movimento
+# (assumindo que o jogador 1 começa o jogo)
+# onde o jogador 1 tem mais que uma posição para jogar
+if False:
+    games = set(
+        [
+            Configuracao(jogo).get_symmetry_id()
+            for jogo in itertools.product([0, 1, 2], repeat=9)
+            if jogo.count(1) - jogo.count(2) == 0
+            and not (
+                Configuracao(jogo).check_vitoria_1()
+                or Configuracao(jogo).check_vitoria_2()
+            )
+            and not jogo.count(0) == 1
+        ]
+    )
+
+    games = list(sorted(games))
+    print("Temos um total de ", len(games), "configurações")
+
+    # exemplos
+    print()
+    for g in games[-30:]:
+        print(Configuracao(g))
+        print()
