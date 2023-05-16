@@ -2,13 +2,14 @@ import numpy as np
 from itertools import product
 from functools import partial
 from random import choices, choice
-from pprint import pprint
 from matplotlib import pyplot as plt
 
 
 ALL_SYMMETRY_OP = {
     "id": lambda x: x,
-    "rot90": np.rot90,
+    "rot90": partial(np.rot90, k=1),
+    "rot180": partial(np.rot90, k=2),
+    "rot270": partial(np.rot90, k=3),
     "flipv": np.fliplr,
     "fliph": np.flipud,
     "flipds": lambda x: np.fliplr(np.rot90(x)),
@@ -19,6 +20,8 @@ ALL_SYMMETRY_OP = {
 ALL_SYMMETRY_OP_INV = {
     "id": lambda x: x,
     "rot90": partial(np.rot90, k=-1),
+    "rot180": partial(np.rot90, k=-2),
+    "rot270": partial(np.rot90, k=-3),
     "flipv": np.fliplr,
     "fliph": np.flipud,
     "flipds": lambda x: np.fliplr(np.rot90(x)),
@@ -26,21 +29,37 @@ ALL_SYMMETRY_OP_INV = {
 }
 
 
+def testa_simetrias():
+    """Para testar se as operações são válidas. Se der print, tem algo errado."""
+    for jogo in map(Configuracao, product([0, 1, 2], repeat=9)):
+        conf = jogo.config
+        for name in ALL_SYMMETRY_OP:
+            op = ALL_SYMMETRY_OP[name](conf)
+            treat = ALL_SYMMETRY_OP_INV[name](op)
+            if not np.all(np.equal(conf, treat)):
+                print(name)
+                print(conf)
+                print()
+                print(treat)
+                print()
+                return
+
+
 class Configuracao:
     """Classe para representar uma configuração do jogo da velha.
 
     Args:
-      arr:
+      representacao:
         Numpy array de representando o jogo. Pode ser a representação em grade
         3x3 ou em vetor linha, tanto faz. Pode ser também a representação em
         string da configuração.
     """
 
-    def __init__(self, arr="000000000"):
-        if isinstance(arr, str):
-            self.config = np.array(list(arr), dtype=int)
+    def __init__(self, representacao="000000000"):
+        if isinstance(representacao, str):
+            self.config = np.array(list(representacao), dtype=int)
         else:
-            self.config = np.array(arr, dtype=int)
+            self.config = np.array(representacao, dtype=int)
 
         msg = "Tua configuração deve ter 9 posições"
         assert len(self.config.ravel() == 9), msg
@@ -104,9 +123,14 @@ class Configuracao:
             mapa[1, 2] = mapa[0, 1]
             mapa[2, 2] = mapa[0, 0]
             mapa[2, 1] = mapa[1, 0]
-        if base == self.symmetries["rot90"]:
+        if base in [self.symmetries["rot90"], self.symmetries["rot270"]]:
             mapa[0, 0] = mapa[0, 2] = mapa[2, 0] = mapa[2, 2] = 1
             mapa[0, 1] = mapa[1, 0] = mapa[1, 2] = mapa[2, 1] = 2
+        if base == self.symmetries["rot180"]:
+            mapa[2, 1] = mapa[0, 1]
+            mapa[1, 2] = mapa[1, 0]
+            mapa[2, 2] = mapa[0, 0]
+            mapa[2, 0] = mapa[0, 2]
 
         # jogadas proibidas tem número -1
         logic = self.config > 0
@@ -115,6 +139,8 @@ class Configuracao:
         return mapa
 
     def create_choice_dict(self, initial_value=2):
+        """Cria dicionário com todas as as jogadas iniciadas com o mesmo valor."""
+
         # tem que converter para a posição padrão antes
         self.get_symmetry_id()
         conf = Configuracao(self.id_)
@@ -138,13 +164,34 @@ class Configuracao:
 
 
 class Jogador:
-    """Cria um agente jogador de jogo da velha."""
+    """Cria um agente jogador de jogo da velha.
 
-    def __init__(self, player_num=1, valor_inicial=2):
+    Args:
+      player_num : int
+        Valor 1 representa jogador que faz primeiro movimento e valor 2
+        representa o outro jogador.
+      valor_inicial : int
+        Quantidade de missangas de cada cor distribuidas inicialmente nas caixas
+        de fósforo.
+      reforco_vitoria : int
+        Quantidade de missangas adicionadas quando se ganha.
+      reforco_derrota : int
+        Quantidade de missangas adicionadas quando se perde.
+    """
+
+    def __init__(
+        self,
+        player_num=1,
+        valor_inicial=2,
+        reforco_vitoria=3,
+        reforco_derrota=-1,
+    ):
+        assert valor_inicial > 0
         self.player_num = player_num
         self.valor_inicial = valor_inicial
         self.cria_dicionario_jogadas()
-        self.fim_de_jogo = False
+        self.reforco_vitoria = reforco_vitoria
+        self.reforco_derrota = reforco_derrota
         self.jogadas = []
 
     def cria_dicionario_jogadas(self):
@@ -155,6 +202,8 @@ class Jogador:
         Condições:
         + Jogador 1 é quem começa a jogar
         + Jogos já ganhos não são listados
+        + jogos com apenas um movimento possível não são listados
+        + jogos sem um movimento possível não são listados
         """
 
         if self.player_num == 1:
@@ -173,6 +222,7 @@ class Jogador:
         self.brain = jogos
 
     def realizar_jogada(self, config, verbose=False):
+        """Recebe uma configuração e retorna a configuração com jogada realizada"""
         id_ = config.get_symmetry_id()
 
         if id_.count("0") == 1:
@@ -184,17 +234,8 @@ class Jogador:
             posicoes = list(dicionario.keys())
             chance = list(dicionario.values())
 
-            # se uma caixa está sem missangas, temos que resetá-la
-            if sum(chance) <= 0:
-                for k in dicionario:
-                    dicionario[k] = self.valor_inicial
-                chance = list(dicionario.values())
-
             # escolhe jogada
-            try:
-                casa_escolhida = choices(posicoes, weights=chance)[0]
-            except ValueError:
-                breakpoint()
+            casa_escolhida = choices(posicoes, weights=chance)[0]
 
             config_up = Configuracao(id_)
             mapa = config_up.symmetry_map()
@@ -211,7 +252,7 @@ class Jogador:
 
             lista = config_up.lista.copy()
             lista[index] = self.player_num
-            array = np.array(lista).reshape(3,3)
+            array = np.array(lista).reshape(3, 3)
             array = ALL_SYMMETRY_OP_INV[config.op_name](array)
             config_up = Configuracao(array)
 
@@ -222,93 +263,105 @@ class Jogador:
 
     def atualizar_vitoria(self):
         """Atualiza os dicionários de escolha em caso de vitória."""
+
         for dicionario, casa_escolhida in self.jogadas:
-            dicionario[casa_escolhida] += 3
+            dicionario[casa_escolhida] += self.reforco_vitoria
+
+            if dicionario[casa_escolhida] < 0:
+                dicionario[casa_escolhida] = 0
+
+            # se uma caixa está sem missangas, temos que resetá-la
+            if sum(list(dicionario.values())) <= 0:
+                for k in dicionario:
+                    dicionario[k] = self.valor_inicial
+
         self.jogadas = []
 
     def atualizar_derrota(self):
         """Atualiza os dicionários de escolha em caso de derrota."""
+
         for dicionario, casa_escolhida in self.jogadas:
-            dicionario[casa_escolhida] -= 1
+            dicionario[casa_escolhida] += self.reforco_derrota
+
+            if dicionario[casa_escolhida] < 0:
+                dicionario[casa_escolhida] = 0
+
+            # se uma caixa está sem missangas, temos que resetá-la
+            if sum(list(dicionario.values())) <= 0:
+                for k in dicionario:
+                    dicionario[k] = self.valor_inicial
+
         self.jogadas = []
 
 
+def simulacao(player1, player2, num_jogos=100):
+    jogadores = [player1, player2]
+    vitorias1 = [0]
+    vitorias2 = [0]
+    empates = [0]
 
-jogadores = [Jogador(1), Jogador(2)]
-num_jogos = 10000
-placar = [0,0,0]
+    for _ in range(num_jogos):
+        config = Configuracao()
+        jogador_da_vez = False
 
-vitorias1 = [0]
-vitorias2 = [0]
-empates = [0]
+        while (
+            (not config.check_vitoria(1))
+            and (not config.check_vitoria(2))
+            and (config.get_symmetry_id().count("0") > 0)
+        ):
+            config = jogadores[jogador_da_vez].realizar_jogada(config, False)
+            jogador_da_vez = not jogador_da_vez
 
-for _ in range(num_jogos):
-    config = Configuracao()
-    jogador_da_vez = False
+        if config.check_vitoria(1):
+            jogadores[0].atualizar_vitoria()
+            jogadores[1].atualizar_derrota()
+            vitorias1.append(vitorias1[-1] + 1)
+            vitorias2.append(vitorias2[-1])
+            empates.append(empates[-1])
 
-    while (
-        (not config.check_vitoria(1))
-        and (not config.check_vitoria(2))
-        and (config.get_symmetry_id().count("0") > 0)
-    ):
-        config = jogadores[jogador_da_vez].realizar_jogada(config, False)
-        jogador_da_vez = not jogador_da_vez
+        elif config.check_vitoria(2):
+            jogadores[1].atualizar_vitoria()
+            jogadores[0].atualizar_derrota()
+            vitorias2.append(vitorias2[-1] + 1)
+            vitorias1.append(vitorias1[-1])
+            empates.append(empates[-1])
 
-    if config.check_vitoria(1):
-        jogadores[0].atualizar_vitoria()
-        jogadores[1].atualizar_derrota()
-        placar[0] += 1
-        vitorias1.append(vitorias1[-1] + 1)
-        vitorias2.append(vitorias2[-1])
-        empates.append(empates[-1])
+        else:
+            vitorias1.append(vitorias1[-1])
+            vitorias2.append(vitorias2[-1])
+            empates.append(empates[-1] + 1)
 
-    elif config.check_vitoria(2):
-        jogadores[1].atualizar_vitoria()
-        jogadores[0].atualizar_derrota()
-        placar[1] += 1
-        vitorias2.append(vitorias2[-1] + 1)
-        vitorias1.append(vitorias1[-1])
-        empates.append(empates[-1])
-
-    else:
-        placar[2] += 1
-        vitorias1.append(vitorias1[-1])
-        vitorias2.append(vitorias2[-1])
-        empates.append(empates[-1] + 1)
-
-jog1 = jogadores[0]
-pprint(jog1.brain)
-
-jog2 = jogadores[1]
-pprint(jog2.brain)
+    return player1, player2, vitorias1, vitorias2, empates
 
 
+def plot(vitorias1, vitorias2, empates, plot_name="", show=False):
+    fig, axe = plt.subplots(
+        ncols=1,
+        nrows=1,
+        figsize=(5, 5),
+        dpi=150,
+    )
 
-fig, axe = plt.subplots(
-    ncols=1,
-    nrows=1,
-    figsize=(5, 5),
-    dpi=150,
-)
+    x = list(range(1, len(vitorias1)))
 
-x = list(range(1, num_jogos+ 1))
+    axe.plot(x, vitorias1[1:], label="Vitórias 1")
+    axe.plot(x, vitorias2[1:], label="Vitórias 2")
+    axe.plot(x, empates[1:], label="Empates")
 
-axe.plot(x, vitorias1[1:], label="Vitórias 1")
-axe.plot(x, vitorias2[1:], label="Vitórias 2")
-axe.plot(x, empates[1:], label="Empates")
+    axe.set_xlabel("Jogo")
+    axe.set_ylabel("Quantidade")
 
-axe.set_xlabel("Jogo")
-axe.set_ylabel("Quantidade")
+    fig.legend()
 
-fig.legend()
+    if plot_name:
+        fig.savefig(
+            f"{plot_name}.png",
+            dpi=150,
+            bbox_inches="tight",
+            pad_inches=2e-2,
+        )
 
-fig.savefig(
-    "simulacao_2.png",
-    dpi=150,
-    bbox_inches='tight',
-    pad_inches=2e-2,
-)
+    if show:
+        plt.show()
 
-plt.show()
-
-plt.close(fig)
+    plt.close(fig)
