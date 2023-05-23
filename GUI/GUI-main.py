@@ -5,7 +5,6 @@ do MENACE - desenvolvido utilizando a biblioteca pygame.
 :)
 """
 
-# (460, 530)
 
 import pygame, sys
 from classfuncs import *
@@ -28,37 +27,38 @@ background = pygame.transform.scale_by(background, scale_factor)
 pygame.mouse.set_visible(False)
 
 
-# ------------------------------------ Sprites e Animações
-# Caixinhas:
-caixinhas_group = pygame.sprite.Group()
-
-caixinha_central = Caixinhas(lambda x: print('oi'))
-caixinhas_group.add(caixinha_central)
-
+# ------------------------------------ Sprites e Animações    
 # OsAndXs:
 OsAndXs_group = pygame.sprite.Group()
 
-X_1 = OsAndXs(100, 100, False)
-OsAndXs_group.add(X_1)
+player = OsAndXs(100, 100, False)
+OsAndXs_group.add(player)
+
+
+# Caixinhas:
+caixinhas_group = pygame.sprite.Group()
+
+for i in range(9):
+    exec("%s = %s" % (f'caixinha{i+1}', f'Caixinhas(player, i+1)'))
+    exec('caixinhas_group.add(%s)' % f'caixinha{i+1}')
 
 
 # ------------------------------------ Loop do jogo
 while running:
+    events = pygame.event.get()
     
     # Close event check:
-    for event in pygame.event.get():
+    for event in events:
         if event.type == pygame.QUIT:
-            running = False            
+            running = False
 
     # Events:
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            pass
     
     # Updates:
     screen.blit(background,(0, 0))
     
     caixinhas_group.draw(screen)
-    caixinhas_group.update()
+    caixinhas_group.update(events)
     
     OsAndXs_group.draw(screen)
     OsAndXs_group.update()
