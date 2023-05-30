@@ -7,7 +7,7 @@ do MENACE - desenvolvido utilizando a biblioteca pygame.
 
 
 import pygame, sys
-from classfuncs import *
+from GUI.classfuncs import *
 
 
 # ------------------------------------ Configurações iniciais
@@ -20,9 +20,9 @@ FPS = 60
 DISPLAY_W, DISPLAY_H = 1280, 960
 screen = pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
 pygame.display.set_caption('MENACE')
-icon = pygame.image.load('files/icon.png')
+icon = pygame.image.load('GUI/files/icon.png')
 pygame.display.set_icon(icon)
-background = pygame.image.load('files/sprites/bg.png')
+background = pygame.image.load('GUI/files/sprites/bg.png')
 background = pygame.transform.scale_by(background, scale_factor)
 pygame.mouse.set_visible(False)
 
@@ -39,8 +39,8 @@ OsAndXs_group.add(player)
 caixinhas_group = pygame.sprite.Group()
 
 for i in range(9):
-    exec("%s = %s" % (f'caixinha{i+1}', f'Caixinhas(player, i+1)'))
-    exec('caixinhas_group.add(%s)' % f'caixinha{i+1}')
+    caixinha_nova = Caixinhas(player,i+1)
+    caixinhas_group.add(caixinha_nova)
 
 
 # ------------------------------------ Loop do jogo
@@ -58,10 +58,10 @@ while running:
     screen.blit(background,(0, 0))
     
     caixinhas_group.draw(screen)
-    caixinhas_group.update(events)
+    caixinhas_group.update()
     
     OsAndXs_group.draw(screen)
-    OsAndXs_group.update()
+    OsAndXs_group.update(events, caixinhas_group)
     
     pygame.display.flip()
     clock.tick(FPS)

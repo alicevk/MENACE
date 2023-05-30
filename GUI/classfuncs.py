@@ -29,18 +29,27 @@ class OsAndXs(pygame.sprite.Sprite):
     def __init__(self, x, y, isX):
         super().__init__()
         self.isX = isX
-        self.sprites = get_sprites((19,19), 'files/sprites/spr_OsAndXs.png')
+        self.sprites = get_sprites((19,19), 'GUI/files/sprites/spr_OsAndXs.png')
         self.image = self.sprites[0] if self.isX else self.sprites[1]
         self.rect = self.image.get_rect()
         self.rect.center = [x,y]
         
-    def update(self):
-         self.rect.center = pygame.mouse.get_pos()
+    def update(self, events, grupo):
+        self.rect.center = pygame.mouse.get_pos()
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return self.clique(grupo)
+         
+    def clique(self, grupo):
+        caixinhas_clicadas = pygame.sprite.spritecollide(self, grupo, False)
+        for caixa in caixinhas_clicadas:
+            return caixa.change_value() if len(caixinhas_clicadas) == 1 else ''
+        
          
 class Caixinhas(pygame.sprite.Sprite):
     def __init__(self, mouse, num):
         super().__init__()
-        self.sprites = get_sprites((19,19), 'files/sprites/spr_caixinha.png')
+        self.sprites = get_sprites((19,19), 'GUI/files/sprites/spr_caixinha.png')
         self.image = self.sprites[0]
         self.rect = self.image.get_rect()
         self.mouse = mouse
@@ -60,15 +69,17 @@ class Caixinhas(pygame.sprite.Sprite):
         }
         self.rect.center = caixinhaDict[self.num]
         
-    def update(self, events):
+    def update(self):
         if self.image == self.sprites[2] or self.image == self.sprites[3]:
             return
         mouse_pos = pygame.mouse.get_pos()
-        hit = self.rect.collidepoint(mouse_pos)
-        self.image = self.sprites[1] if hit else self.sprites[0]
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN and hit:
-                return self.change_value()
+        hover = self.rect.collidepoint(mouse_pos)
+        self.image = self.sprites[1] if hover else self.sprites[0]
             
     def change_value(self):
         self.image = self.sprites[2] if self.mouse.isX else self.sprites[3]
+
+class CenaAnimada(pygame.sprite.Sprite):
+    def __init__(self, x, y, isX):
+        super().__init__()
+        pass
