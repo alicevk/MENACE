@@ -223,6 +223,7 @@ class Jogador:
 
     def realizar_jogada(self, config, verbose=False):
         """Recebe uma configuração e retorna a configuração com jogada realizada"""
+        config = Configuracao(config) if isinstance(config, str) else config
         id_ = config.get_symmetry_id()
 
         if id_.count("0") == 1:

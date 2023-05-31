@@ -6,6 +6,7 @@ implementação da interface gráfica do MENACE!
 """
 
 import pygame
+from files.api import *
 scale_factor = 10 # so every sprite has the same scale
 
 # ------------------------------------ Functions
@@ -34,6 +35,19 @@ def get_sprites(size, file):
     return sprites
 
 
+def get_string(grupo_caixas):
+    saida = ''
+    for caixa in grupo_caixas:
+        saida += str(int(caixa.value))
+    return saida
+
+
+def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual):
+    for caixa, valor_antigo, valor_atual in zip(grupo_caixas, jogada_antiga, jogada_atual.lista):
+        if valor_antigo != str(valor_atual): caixa.change_value(valor_atual)
+
+
+
 # ------------------------------------ Classes        
 class Caixinhas(pygame.sprite.Sprite):
     '''
@@ -50,7 +64,7 @@ class Caixinhas(pygame.sprite.Sprite):
     def __init__(self, mouse, num):
         super().__init__()
         self.value = 0
-        self.sprites = get_sprites((19,19), 'GUI/files/sprites/spr_caixinha.png')
+        self.sprites = get_sprites((19,19), 'files/assets/sprites/spr_caixinha.png')
         self.image = self.sprites[0]
         self.rect = self.image.get_rect()
         self.mouse = mouse
@@ -70,7 +84,7 @@ class Caixinhas(pygame.sprite.Sprite):
         }
         self.rect.center = caixinhaDict[self.num]
         
-    def update(self, events):
+    def update(self, events, menace, grupo_caixas):
         if self.image == self.sprites[2] or self.image == self.sprites[3]:
             return
         mouse_pos = pygame.mouse.get_pos()
@@ -78,7 +92,8 @@ class Caixinhas(pygame.sprite.Sprite):
         self.image = self.sprites[1] if hover else self.sprites[0]
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and hover:
-                return self.change_value(2) if self.mouse.isX else self.change_value(1)
+                self.change_value(self.mouse.isX+1)
+                menace.jogada(grupo_caixas)
         
             
     def change_value(self, valor):
@@ -87,25 +102,34 @@ class Caixinhas(pygame.sprite.Sprite):
 
 
 class OsAndXs(pygame.sprite.Sprite):
-
-    def __init__(self, x, y, isX):
+    def __init__(self, isX, xy=None):
         super().__init__()
         self.isX = isX
-        self.sprites = get_sprites((19,19), 'GUI/files/sprites/spr_OsAndXs.png')
-        self.image = self.sprites[0] if self.isX else self.sprites[1]
+        if xy == None: return
+        self.sprites = get_sprites((19,19), 'files/assets/sprites/spr_OsAndXs.png')
+        self.image = self.sprites[isX]
         self.rect = self.image.get_rect()
-        self.rect.center = [x,y]
-            
+        self.rect.center = list(xy)
+                    
  
 class Player(OsAndXs):
-    def __init__(self, x, y, isX):
-        super().__init__(x, y, isX)
+    def __init__(self, isX, xy=None):
+        super().__init__(isX, xy)
         
     def update(self):
         self.rect.center = pygame.mouse.get_pos()
 
      
-# class Menace(OsAndXs):
+class Menace(OsAndXs):
+    def __init__(self, isX, xy=None):
+        super().__init__(isX, xy)
+        self.menace = Jogador(isX+1)
+    
+    def jogada(self, grupo_caixas):
+        estado_jogo = get_string(grupo_caixas)
+        jogada_menace = self.menace.realizar_jogada(estado_jogo, True)
+        atualizar_tela(grupo_caixas, estado_jogo, jogada_menace)
+    
 
 class CenaAnimada(pygame.sprite.Sprite):
     def __init__(self, x, y, isX):

@@ -7,7 +7,8 @@ do MENACE - desenvolvido utilizando a biblioteca pygame.
 
 
 import pygame, sys
-from GUI.classfuncs import *
+from files.classfuncs import *
+from files.api import *
 
 
 # ------------------------------------ Configurações iniciais
@@ -20,9 +21,9 @@ FPS = 60
 DISPLAY_W, DISPLAY_H = 1280, 960
 screen = pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
 pygame.display.set_caption('MENACE')
-icon = pygame.image.load('GUI/files/icon.png')
+icon = pygame.image.load('files/assets/icon.png')
 pygame.display.set_icon(icon)
-background = pygame.image.load('GUI/files/sprites/bg.png')
+background = pygame.image.load('files/assets/sprites/bg.png')
 background = pygame.transform.scale_by(background, scale_factor)
 pygame.mouse.set_visible(False)
 
@@ -31,9 +32,11 @@ pygame.mouse.set_visible(False)
 # Player:
 Player_group = pygame.sprite.Group()
 
-player = Player(100, 100, False)
+player = Player(False, (100, 100))
 Player_group.add(player)
 
+# Menace:
+menace = Menace(not player.isX)
 
 # Caixinhas:
 caixinhas_group = pygame.sprite.Group()
@@ -56,14 +59,18 @@ while running:
     screen.blit(background,(0, 0))
     
     caixinhas_group.draw(screen)
-    caixinhas_group.update(events)
+    caixinhas_group.update(events, menace, caixinhas_group)
     
     Player_group.draw(screen)
     Player_group.update()
     
     pygame.display.flip()
-    clock.tick(FPS)
+    clock.tick(FPS)    
 
     
 pygame.quit()
 sys.exit()
+
+
+# criar instância para cada jogada Conifguracao("string da jogada em 0,1, 2 ")
+# jogador.realizar_jogada()
