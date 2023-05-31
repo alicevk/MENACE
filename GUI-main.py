@@ -27,12 +27,12 @@ background = pygame.transform.scale_by(background, scale_factor)
 pygame.mouse.set_visible(False)
 
 
-# ------------------------------------ Sprites e Animações    
-# OsAndXs:
-OsAndXs_group = pygame.sprite.Group()
+# ------------------------------------ Instâncias e objetos 
+# Player:
+Player_group = pygame.sprite.Group()
 
-player = OsAndXs(100, 100, False)
-OsAndXs_group.add(player)
+player = Player(100, 100, False)
+Player_group.add(player)
 
 
 # Caixinhas:
@@ -52,16 +52,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Events:
-    
     # Updates:
     screen.blit(background,(0, 0))
     
     caixinhas_group.draw(screen)
-    caixinhas_group.update()
+    caixinhas_group.update(events)
     
-    OsAndXs_group.draw(screen)
-    OsAndXs_group.update(events, caixinhas_group)
+    Player_group.draw(screen)
+    Player_group.update()
     
     pygame.display.flip()
     clock.tick(FPS)

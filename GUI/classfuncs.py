@@ -24,28 +24,7 @@ def get_sprites(size, file):
     return sprites
 
 
-# ------------------------------------ Classes
-class OsAndXs(pygame.sprite.Sprite):
-    def __init__(self, x, y, isX):
-        super().__init__()
-        self.isX = isX
-        self.sprites = get_sprites((19,19), 'GUI/files/sprites/spr_OsAndXs.png')
-        self.image = self.sprites[0] if self.isX else self.sprites[1]
-        self.rect = self.image.get_rect()
-        self.rect.center = [x,y]
-        
-    def update(self, events, grupo):
-        self.rect.center = pygame.mouse.get_pos()
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                return self.clique(grupo)
-         
-    def clique(self, grupo):
-        caixinhas_clicadas = pygame.sprite.spritecollide(self, grupo, False)
-        for caixa in caixinhas_clicadas:
-            return caixa.change_value() if len(caixinhas_clicadas) == 1 else ''
-        
-         
+# ------------------------------------ Classes        
 class Caixinhas(pygame.sprite.Sprite):
     def __init__(self, mouse, num):
         super().__init__()
@@ -69,15 +48,54 @@ class Caixinhas(pygame.sprite.Sprite):
         }
         self.rect.center = caixinhaDict[self.num]
         
-    def update(self):
+    def update(self, events):
         if self.image == self.sprites[2] or self.image == self.sprites[3]:
             return
         mouse_pos = pygame.mouse.get_pos()
         hover = self.rect.collidepoint(mouse_pos)
         self.image = self.sprites[1] if hover else self.sprites[0]
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN and hover:
+                saida = self.change_value()
+                return saida
+        
             
     def change_value(self):
+        '''
+        Returns:
+            box_num: in which box (1 to 9) the value was changed
+            
+            player_num: whether the 'player' who changed the value is an O or X
+            (O being player #1 and X player #2)
+        '''
         self.image = self.sprites[2] if self.mouse.isX else self.sprites[3]
+        box_num = self.num
+        player_num = self.mouse.isX+1
+        return box_num, player_num
+
+
+class OsAndXs(pygame.sprite.Sprite):
+    def __init__(self, x, y, isX):
+        super().__init__()
+        self.isX = isX
+        self.sprites = get_sprites((19,19), 'GUI/files/sprites/spr_OsAndXs.png')
+        self.image = self.sprites[0] if self.isX else self.sprites[1]
+        self.rect = self.image.get_rect()
+        self.rect.center = [x,y]
+            
+ 
+class Player(OsAndXs):
+    def __init__(self, x, y, isX):
+        super().__init__(x, y, isX)
+        
+    def update(self):#, events, grupo):
+        self.rect.center = pygame.mouse.get_pos()
+
+     
+# class Menace(OsAndXs):
+#     def __init__(self, x, y, isX):
+#         super().__init__(x, y, isX)
+
 
 class CenaAnimada(pygame.sprite.Sprite):
     def __init__(self, x, y, isX):
