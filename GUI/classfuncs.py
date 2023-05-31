@@ -1,15 +1,25 @@
 """
-Este é o arquivo responsável por guardar todas as classes e funções utilizadas na implementação do
-MENACE!
+Este é o arquivo responsável por guardar todas as classes e funções utilizadas na
+implementação da interface gráfica do MENACE!
 
 :)
 """
 
 import pygame
-scale_factor = 10
+scale_factor = 10 # so every sprite has the same scale
 
 # ------------------------------------ Functions
 def get_sprites(size, file):
+    '''
+    transforms a spritesheet image file into a list of individual pygame sprites.
+
+    Args:
+        size (tup): (width, height)_of each individual sprite
+        file (str): path to spritesheet image
+
+    Returns:
+        sprites (list): list of pygame surfaces/sprites
+    '''
     w, h = size
     x, y = (0, 0)
     sheet = pygame.image.load(file).convert_alpha()
@@ -26,8 +36,20 @@ def get_sprites(size, file):
 
 # ------------------------------------ Classes        
 class Caixinhas(pygame.sprite.Sprite):
+    '''
+    represent each position that can be chosen in the game. will change its value
+    when clicked on.
+    
+    Args:
+        mouse (object): player object (to get mouse/player identity O or X)
+        num (int): box number/position 1-9
+
+    Returns:
+        sprites (list): list of pygame surfaces/sprites
+    '''
     def __init__(self, mouse, num):
         super().__init__()
+        self.value = 0
         self.sprites = get_sprites((19,19), 'GUI/files/sprites/spr_caixinha.png')
         self.image = self.sprites[0]
         self.rect = self.image.get_rect()
@@ -56,25 +78,16 @@ class Caixinhas(pygame.sprite.Sprite):
         self.image = self.sprites[1] if hover else self.sprites[0]
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and hover:
-                saida = self.change_value()
-                return saida
+                return self.change_value(2) if self.mouse.isX else self.change_value(1)
         
             
-    def change_value(self):
-        '''
-        Returns:
-            box_num: in which box (1 to 9) the value was changed
-            
-            player_num: whether the 'player' who changed the value is an O or X
-            (O being player #1 and X player #2)
-        '''
-        self.image = self.sprites[2] if self.mouse.isX else self.sprites[3]
-        box_num = self.num
-        player_num = self.mouse.isX+1
-        return box_num, player_num
+    def change_value(self, valor):
+        self.image = self.sprites[valor+1]
+        self.value = valor
 
 
 class OsAndXs(pygame.sprite.Sprite):
+
     def __init__(self, x, y, isX):
         super().__init__()
         self.isX = isX
@@ -88,14 +101,11 @@ class Player(OsAndXs):
     def __init__(self, x, y, isX):
         super().__init__(x, y, isX)
         
-    def update(self):#, events, grupo):
+    def update(self):
         self.rect.center = pygame.mouse.get_pos()
 
      
 # class Menace(OsAndXs):
-#     def __init__(self, x, y, isX):
-#         super().__init__(x, y, isX)
-
 
 class CenaAnimada(pygame.sprite.Sprite):
     def __init__(self, x, y, isX):
