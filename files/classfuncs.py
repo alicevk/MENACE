@@ -121,13 +121,14 @@ class Player(OsAndXs):
 
      
 class Menace(OsAndXs):
-    def __init__(self, isX, xy=None):
+    def __init__(self, isX, xy=None, verbose=False):
         super().__init__(isX, xy)
+        self.verbose = verbose
         self.menace = Jogador(isX+1)
     
     def jogada(self, grupo_caixas):
         estado_jogo = get_string(grupo_caixas)
-        jogada_menace = self.menace.realizar_jogada(estado_jogo, True)
+        jogada_menace = self.menace.realizar_jogada(estado_jogo, self.verbose)
         atualizar_tela(grupo_caixas, estado_jogo, jogada_menace)
     
 
