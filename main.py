@@ -1,13 +1,13 @@
 """
-Oi! Este é o arquivo pincipal da interface gráfica utilizado na nossa implementação
-do MENACE - desenvolvido utilizando a biblioteca pygame.
+Oi! Este é o arquivo pincipal da nossa implementação do MENACE - desenvolvido utilizando
+a biblioteca pygame.
 
 :)
 """
 
 
 import pygame, sys
-from files.classfuncs import *
+from files.gui import *
 from files.api import *
 
 
@@ -54,6 +54,9 @@ while running:
     for event in events:
         if event.type == pygame.QUIT:
             running = False
+            
+    # Win event check:
+    
 
     # Updates:
     screen.blit(background,(0, 0))
@@ -65,7 +68,7 @@ while running:
     Player_group.update()
     
     pygame.display.flip()
-    clock.tick(FPS)    
+    clock.tick(FPS)
 
     
 pygame.quit()
