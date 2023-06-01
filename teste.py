@@ -1,4 +1,4 @@
-from api import Jogador, simulacao, plot
+from files.api import Jogador, simulacao, plot
 from pprint import pprint
 import numpy as np
 
@@ -16,9 +16,9 @@ if __name__ == '__main__':
     #     player1, player2, num_jogos
     # )
 
-    player3, player4, vitorias3, vitorias4, empates34 = simulacao(
-        player3, player4, num_jogos
-    )
+    # player3, player4, vitorias3, vitorias4, empates34 = simulacao(
+    #     player3, player4, num_jogos
+    # )
 
     num_jogos = 10000
 

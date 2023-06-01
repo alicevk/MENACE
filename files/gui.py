@@ -45,7 +45,29 @@ def get_string(grupo_caixas):
 def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual):
     for caixa, valor_antigo, valor_atual in zip(grupo_caixas, jogada_antiga, jogada_atual.lista):
         if valor_antigo != str(valor_atual): caixa.change_value(valor_atual)
+        
+        
+def vitoria(quem_ganhou, lista_de_listas, menace=None):
+    lista_jogador, lista_menace, lista_empates = lista_de_listas
+    if quem_ganhou=='p':
+        menace.atualizar_derrota()
+        lista_jogador.append(lista_jogador[-1]+1)
+        lista_menace.append(lista_menace[-1])
+        print('Você ganhou!')
+    else:
+        quem_ganhou.atualizar_vitoria()
+        lista_jogador.append(lista_jogador[-1])
+        lista_menace.append(lista_menace[-1]+1)
+        print('Você ganhou!')        
+    lista_empates.append(lista_empates[-1])
+    print('Empate!')
 
+
+def empate(lista_de_listas):
+    lista_jogador, lista_menace, lista_empates = lista_de_listas
+    lista_jogador.append(lista_jogador[-1])
+    lista_menace.append(lista_menace[-1])
+    lista_empates.append(lista_empates[-1] + 1)
 
 
 # ------------------------------------ Classes        
@@ -84,7 +106,7 @@ class Caixinhas(pygame.sprite.Sprite):
         }
         self.rect.center = caixinhaDict[self.num]
         
-    def update(self, events, menace, grupo_caixas):
+    def update(self, events, menace, grupo_caixas, lista_de_listas):
         if self.image == self.sprites[2] or self.image == self.sprites[3]:
             return
         mouse_pos = pygame.mouse.get_pos()
@@ -93,7 +115,7 @@ class Caixinhas(pygame.sprite.Sprite):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and hover:
                 self.change_value(self.mouse.isX+1)
-                menace.jogada(grupo_caixas)
+                menace.jogada(grupo_caixas, lista_de_listas)
         
             
     def change_value(self, valor):
@@ -126,10 +148,22 @@ class Menace(OsAndXs):
         self.verbose = verbose
         self.menace = Jogador(isX+1)
     
-    def jogada(self, grupo_caixas):
+    def jogada(self, grupo_caixas, lista_de_listas):
         estado_jogo = get_string(grupo_caixas)
-        jogada_menace = self.menace.realizar_jogada(estado_jogo, self.verbose)
-        atualizar_tela(grupo_caixas, estado_jogo, jogada_menace)
+        config = Configuracao(estado_jogo)
+        if (
+            (not config.check_vitoria(1))
+            and (not config.check_vitoria(2))
+            and (config.get_symmetry_id().count("0") > 0)
+        ):
+            config = self.menace.realizar_jogada(estado_jogo, self.verbose)
+            atualizar_tela(grupo_caixas, estado_jogo, config)
+        if config.check_vitoria(self.isX+1):
+            vitoria(self.menace, lista_de_listas)
+        elif config.check_vitoria((not self.isX)+1):
+            vitoria('p', lista_de_listas, self.menace)
+        elif config.get_symmetry_id().count("0") == 0:
+            empate(lista_de_listas)
     
 
 class CenaAnimada(pygame.sprite.Sprite):

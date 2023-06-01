@@ -27,6 +27,12 @@ background = pygame.image.load('files/assets/sprites/bg.png')
 background = pygame.transform.scale_by(background, scale_factor)
 pygame.mouse.set_visible(False)
 
+# Placar:
+vitorias_jogador = [0]
+vitorias_menace = [0]
+empates = [0]
+lista_de_listas = [vitorias_jogador, vitorias_menace, empates]
+
 
 # ------------------------------------ Instâncias e objetos 
 # Player:
@@ -54,15 +60,12 @@ while running:
     for event in events:
         if event.type == pygame.QUIT:
             running = False
-            
-    # Win event check:
-    
 
     # Updates:
     screen.blit(background,(0, 0))
     
     caixinhas_group.draw(screen)
-    caixinhas_group.update(events, menace, caixinhas_group)
+    caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas)
     
     Player_group.draw(screen)
     Player_group.update()
@@ -73,7 +76,3 @@ while running:
     
 pygame.quit()
 sys.exit()
-
-
-# criar instância para cada jogada Conifguracao("string da jogada em 0,1, 2 ")
-# jogador.realizar_jogada()
