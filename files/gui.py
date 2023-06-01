@@ -58,9 +58,8 @@ def vitoria(quem_ganhou, lista_de_listas, menace=None):
         quem_ganhou.atualizar_vitoria()
         lista_jogador.append(lista_jogador[-1])
         lista_menace.append(lista_menace[-1]+1)
-        print('Você ganhou!')        
+        print('MENACE ganhou!')        
     lista_empates.append(lista_empates[-1])
-    print('Empate!')
 
 
 def empate(lista_de_listas):
@@ -68,6 +67,7 @@ def empate(lista_de_listas):
     lista_jogador.append(lista_jogador[-1])
     lista_menace.append(lista_menace[-1])
     lista_empates.append(lista_empates[-1] + 1)
+    print('Empate!')
 
 
 # ------------------------------------ Classes        
@@ -158,12 +158,9 @@ class Menace(OsAndXs):
         ):
             config = self.menace.realizar_jogada(estado_jogo, self.verbose)
             atualizar_tela(grupo_caixas, estado_jogo, config)
-        if config.check_vitoria(self.isX+1):
-            vitoria(self.menace, lista_de_listas)
-        elif config.check_vitoria((not self.isX)+1):
-            vitoria('p', lista_de_listas, self.menace)
-        elif config.get_symmetry_id().count("0") == 0:
-            empate(lista_de_listas)
+        if config.check_vitoria(self.isX+1): vitoria(self.menace, lista_de_listas)
+        elif config.check_vitoria((not self.isX)+1): vitoria('p', lista_de_listas, self.menace)
+        elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas)
     
 
 class CenaAnimada(pygame.sprite.Sprite):
