@@ -47,7 +47,7 @@ def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual):
         if valor_antigo != str(valor_atual): caixa.change_value(valor_atual)
         
         
-def vitoria(quem_ganhou, lista_de_listas, menace=None):
+def vitoria(quem_ganhou, lista_de_listas, grupo_caixas, menace=None):
     lista_jogador, lista_menace, lista_empates = lista_de_listas
     if quem_ganhou=='p':
         menace.atualizar_derrota()
@@ -60,14 +60,23 @@ def vitoria(quem_ganhou, lista_de_listas, menace=None):
         lista_menace.append(lista_menace[-1]+1)
         print('MENACE ganhou!')        
     lista_empates.append(lista_empates[-1])
+    reset_game(grupo_caixas)
+    print(lista_de_listas)
 
 
-def empate(lista_de_listas):
+def empate(lista_de_listas, grupo_caixas):
     lista_jogador, lista_menace, lista_empates = lista_de_listas
     lista_jogador.append(lista_jogador[-1])
     lista_menace.append(lista_menace[-1])
     lista_empates.append(lista_empates[-1] + 1)
     print('Empate!')
+    reset_game(grupo_caixas)
+    print(lista_de_listas)
+
+
+def reset_game(grupo_caixas):
+    for caixa in grupo_caixas:
+        caixa.change_value(0)
 
 
 # ------------------------------------ Classes        
@@ -119,7 +128,9 @@ class Caixinhas(pygame.sprite.Sprite):
         
             
     def change_value(self, valor):
-        self.image = self.sprites[valor+1]
+        if valor==0:
+            self.image = self.sprites[0]
+        else: self.image = self.sprites[valor+1]
         self.value = valor
 
 
@@ -158,9 +169,9 @@ class Menace(OsAndXs):
         ):
             config = self.menace.realizar_jogada(estado_jogo, self.verbose)
             atualizar_tela(grupo_caixas, estado_jogo, config)
-        if config.check_vitoria(self.isX+1): vitoria(self.menace, lista_de_listas)
-        elif config.check_vitoria((not self.isX)+1): vitoria('p', lista_de_listas, self.menace)
-        elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas)
+        if config.check_vitoria(self.isX+1): vitoria(self.menace, lista_de_listas, grupo_caixas)
+        elif config.check_vitoria((not self.isX)+1): vitoria('p', lista_de_listas, grupo_caixas, self.menace)
+        elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas, grupo_caixas)
     
 
 class CenaAnimada(pygame.sprite.Sprite):
