@@ -5,9 +5,13 @@ implementação da interface gráfica do MENACE!
 :)
 """
 
+from typing import Any
 import pygame
+import pickle
 from files.api import *
+
 scale_factor = 10 # so every sprite has the same scale
+brain_save_path = 'files/assets/brain.pickle'
 
 # ------------------------------------ Functions
 def get_sprites(size, file):
@@ -77,7 +81,7 @@ def empate(lista_de_listas, grupo_caixas):
 def reset_game(grupo_caixas):
     for caixa in grupo_caixas:
         caixa.change_value(0)
-
+        
 
 # ------------------------------------ Classes        
 class Caixinhas(pygame.sprite.Sprite):
@@ -115,7 +119,7 @@ class Caixinhas(pygame.sprite.Sprite):
         }
         self.rect.center = caixinhaDict[self.num]
         
-    def update(self, events, menace, grupo_caixas, lista_de_listas):
+    def update(self, events, menace, grupo_caixas, lista_de_listas, anim_grupo):
         if self.image == self.sprites[2] or self.image == self.sprites[3]:
             return
         mouse_pos = pygame.mouse.get_pos()
@@ -124,7 +128,7 @@ class Caixinhas(pygame.sprite.Sprite):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and hover:
                 self.change_value(self.mouse.isX+1)
-                menace.jogada(grupo_caixas, lista_de_listas)
+                menace.jogada(grupo_caixas, lista_de_listas, anim_grupo)
         
             
     def change_value(self, valor):
@@ -159,7 +163,12 @@ class Menace(OsAndXs):
         self.verbose = verbose
         self.menace = Jogador(isX+1)
     
-    def jogada(self, grupo_caixas, lista_de_listas):
+    def jogada(self, grupo_caixas, lista_de_listas, anim_grupo):
+        # Animação:
+        cena_embaralhando = CenaAnimada((640, 480),(70, 70),'spr_embaralhando.png')
+        anim_grupo.add(cena_embaralhando)
+        cena_embaralhando.animando = 15
+        # Jogada:
         estado_jogo = get_string(grupo_caixas)
         config = Configuracao(estado_jogo)
         if (
@@ -173,8 +182,26 @@ class Menace(OsAndXs):
         elif config.check_vitoria((not self.isX)+1): vitoria('p', lista_de_listas, grupo_caixas, self.menace)
         elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas, grupo_caixas)
     
+    def save_pickle(self):
+        with open(brain_save_path, 'wb') as handle:
+            pickle.dump(self.menace.brain, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        
 
 class CenaAnimada(pygame.sprite.Sprite):
-    def __init__(self, x, y, isX):
+    def __init__(self, xy, size, file):
         super().__init__()
-        pass
+        self.sprites = get_sprites(size, 'files/assets/sprites/'+file)
+        self.image = self.sprites[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = list(xy)
+        self.count = 0
+        self.animando = 0
+    
+    def update(self):
+        if self.animando >= 0:
+            buff = .4
+            self.count += buff
+            self.animando -= buff
+        else: self.kill()
+        if self.count >= len(self.sprites): self.count = 0
+        self.image = self.sprites[int(self.count)]

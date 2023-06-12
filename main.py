@@ -44,6 +44,9 @@ Player_group.add(player)
 # Menace:
 menace = Menace(not player.isX)
 
+# Animação:
+animacao_group = pygame.sprite.Group()
+
 # Caixinhas:
 caixinhas_group = pygame.sprite.Group()
 
@@ -58,24 +61,30 @@ while running:
     # Close event check:
     for event in events:
         if event.type == pygame.QUIT:
+            menace.save_pickle()
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 print(menace.menace.brain)
     
     if player.isX and get_string(caixinhas_group) == '000000000':
-        menace.jogada(caixinhas_group, lista_de_listas)
+        menace.jogada(caixinhas_group, lista_de_listas, animacao_group)
 
     # Updates:
     screen.blit(background,(0, 0))
     
     caixinhas_group.draw(screen)
-    caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas)
+    caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas, animacao_group)
     
     Player_group.draw(screen)
     Player_group.update()
     
-    pygame.display.flip()
+    if len(animacao_group) != 0: screen.fill((0,0,0))
+    
+    animacao_group.draw(screen)
+    animacao_group.update()
+    
+    pygame.display.update()
     clock.tick(FPS)
 
     
