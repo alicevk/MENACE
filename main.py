@@ -38,7 +38,7 @@ lista_de_listas = [vitorias_jogador, vitorias_menace, empates]
 # Player:
 Player_group = pygame.sprite.Group()
 
-player = Player(False, (100, 100))
+player = Player(True, (100, 100))
 Player_group.add(player)
 
 # Menace:
@@ -51,7 +51,6 @@ for i in range(9):
     caixinha_nova = Caixinhas(player,i+1)
     caixinhas_group.add(caixinha_nova)
 
-
 # ------------------------------------ Loop do jogo
 while running:
     events = pygame.event.get()
@@ -60,6 +59,12 @@ while running:
     for event in events:
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                print(menace.menace.brain)
+    
+    if player.isX and get_string(caixinhas_group) == '000000000':
+        menace.jogada(caixinhas_group, lista_de_listas)
 
     # Updates:
     screen.blit(background,(0, 0))
