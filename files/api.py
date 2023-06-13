@@ -224,8 +224,28 @@ class Jogador:
 
         self.brain = jogos
 
-    def realizar_jogada(self, config, verbose=False):
-        """Recebe uma configuração e retorna a configuração com jogada realizada"""
+    def realizar_jogada(self, config, verbose=False, return_prob=False):
+        """Recebe uma configuração e retorna a configuração com jogada realizada.
+
+        Args:
+          config:
+            Configuração atual do tabuleiro. Pode ser string ou instancia de
+            Configuracao.
+          verbose:
+            Se `True`, então printa informações da jogada. Para ser usado no
+            debug.
+          return_prob:
+            Se `True`, então além da jogada realizada, retorna um array com as
+            probabilidades que cada casa tinha de ser sorteada. Probabilidades
+            representadas em um número entre zero e um.
+
+        Return:
+          Se `return_prob=False` então retorna uma instância de Configuração com
+          a jogada já realizada. Se `return_prob=True`, então retorna
+          adicionalmente um array com as probabilidade de cada casa ser jogada
+          (probabilidades antes da jogada ser realizada).
+        """
+
         config = Configuracao(config) if isinstance(config, str) else config
         id_ = config.get_symmetry_id()
 
@@ -263,7 +283,23 @@ class Jogador:
             # registra jogo feito
             self.jogadas.append([dicionario, casa_escolhida])
 
-        return config_up
+        if return_prob:
+
+            # computa as chances de cada casa ser jogada
+            prob_cada_casa = np.zeros(9)
+
+            for i in range(9):
+                pos = mapa.ravel()[i]
+                prob_cada_casa[i] = dicionario[pos] if pos > 0 else 0
+
+            prob_cada_casa /= prob_cada_casa.sum()
+            prob_cada_casa = prob_cada_casa.reshape(3,3)
+            prob_cada_casa = ALL_SYMMETRY_OP_INV[config.op_name](prob_cada_casa)
+
+            return config_up, prob_cada_casa
+
+        else:
+            return config_up
 
     def atualizar_vitoria(self):
         """Atualiza os dicionários de escolha em caso de vitória."""
