@@ -138,14 +138,48 @@ class Configuracao:
 
         return mapa
 
-    def create_choice_dict(self, initial_value=2):
-        """Cria dicionário com todas as as jogadas iniciadas com o mesmo valor."""
+    def create_choice_dict(self, initial_value=8, decay=2):
+        """Cria dicionário com todas as as jogadas iniciadas com o mesmo valor.
+
+        Args:
+          initial_value:
+            Inteiro que será o número de beads de cada posição permitida na
+            primeira rodada.
+          decay:
+            Taxa de perda de beads a cada rodada.
+
+        Returns:
+          Dicionário com posições como chaves e número de beads como valores.
+        """
+
+        self.get_symmetry_id()
+
+        # computa o número de beads desta rodada usando decay
+        num_empty = self.id_.count("0")
+        num_beads = 0
+        if num_empty >= 8:
+            # primeira jogada do jogador 1 ou 2
+            num_beads = initial_value
+        elif num_empty >= 6:
+            # segunda jogada do jogador 1 ou 2
+            num_beads = initial_value / decay
+        elif num_empty >= 4:
+            # terceira jogada do jogador 1 ou 2
+            num_beads = (initial_value / decay) / decay
+        elif num_empty >= 2:
+            # quarta jogada do jogador 1 ou 2
+            num_beads = ((initial_value / decay) / decay) / decay
+
+        num_beads = int(round(num_beads))
+        num_beads = num_beads if num_beads > 0 else 1
 
         # tem que converter para a posição padrão antes
-        self.get_symmetry_id()
         conf = Configuracao(self.id_)
         mapa = conf.symmetry_map()
-        choice_dict = {v: initial_value for v in set(mapa[mapa > 0])}
+
+        # preenche dicionário
+        choice_dict = {v: num_beads for v in set(mapa[mapa > 0])}
+
         return choice_dict
 
     def check_vitoria(self, jogador):
@@ -184,14 +218,16 @@ class Jogador:
     def __init__(
         self,
         player_num=1,
-        valor_inicial=2,
+        valor_inicial=8,
         reforco_vitoria=3,
         reforco_derrota=-1,
         reforco_empate=0,
+        decay_do_valor_inicial=2,
     ):
         assert valor_inicial > 0
         self.player_num = player_num
         self.valor_inicial = valor_inicial
+        self.decay_do_valor_inicial = decay_do_valor_inicial
         self.cria_dicionario_jogadas()
         self.reforco_vitoria = reforco_vitoria
         self.reforco_derrota = reforco_derrota
@@ -215,7 +251,9 @@ class Jogador:
             diff = 1
 
         jogos = {
-            jogo.get_symmetry_id(): jogo.create_choice_dict(self.valor_inicial)
+            jogo.get_symmetry_id(): jogo.create_choice_dict(
+                self.valor_inicial, self.decay_do_valor_inicial
+            )
             for jogo in map(Configuracao, product([0, 1, 2], repeat=9))
             if jogo.lista.count(1) - jogo.lista.count(2) == diff
             and not (jogo.check_vitoria(1) or jogo.check_vitoria(2))
@@ -284,7 +322,6 @@ class Jogador:
             self.jogadas.append([dicionario, casa_escolhida])
 
         if return_prob:
-
             # computa as chances de cada casa ser jogada
             prob_cada_casa = np.zeros(9)
 
@@ -293,8 +330,10 @@ class Jogador:
                 prob_cada_casa[i] = dicionario[pos] if pos > 0 else 0
 
             prob_cada_casa /= prob_cada_casa.sum()
-            prob_cada_casa = prob_cada_casa.reshape(3,3)
-            prob_cada_casa = ALL_SYMMETRY_OP_INV[config.op_name](prob_cada_casa)
+            prob_cada_casa = prob_cada_casa.reshape(3, 3)
+            prob_cada_casa = ALL_SYMMETRY_OP_INV[config.op_name](
+                prob_cada_casa
+            )
 
             return config_up, prob_cada_casa
 
