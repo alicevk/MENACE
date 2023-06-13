@@ -231,6 +231,7 @@ class Jogador:
         self.cria_dicionario_jogadas()
         self.reforco_vitoria = reforco_vitoria
         self.reforco_derrota = reforco_derrota
+        self.reforco_empate = reforco_empate
         self.jogadas = []
 
     def cria_dicionario_jogadas(self):
