@@ -177,6 +177,8 @@ class Jogador:
         Quantidade de missangas adicionadas quando se ganha.
       reforco_derrota : int
         Quantidade de missangas adicionadas quando se perde.
+      reforco_empate : int
+        Quantidade de missangas adicionadas quando se empata.
     """
 
     def __init__(
@@ -185,6 +187,7 @@ class Jogador:
         valor_inicial=2,
         reforco_vitoria=3,
         reforco_derrota=-1,
+        reforco_empate=0,
     ):
         assert valor_inicial > 0
         self.player_num = player_num
@@ -294,6 +297,22 @@ class Jogador:
 
         self.jogadas = []
 
+    def atualizar_empate(self):
+        """Atualiza os dicionários de escolha em caso de empate."""
+
+        for dicionario, casa_escolhida in self.jogadas:
+            dicionario[casa_escolhida] += self.reforco_empate
+
+            if dicionario[casa_escolhida] < 0:
+                dicionario[casa_escolhida] = 0
+
+            # se uma caixa está sem missangas, temos que resetá-la
+            if sum(list(dicionario.values())) <= 0:
+                for k in dicionario:
+                    dicionario[k] = self.valor_inicial
+
+        self.jogadas = []
+
 
 def simulacao(player1, player2, num_jogos=100):
     jogadores = [player1, player2]
@@ -328,6 +347,8 @@ def simulacao(player1, player2, num_jogos=100):
             empates.append(empates[-1])
 
         else:
+            jogadores[1].atualizar_empate()
+            jogadores[0].atualizar_empate()
             vitorias1.append(vitorias1[-1])
             vitorias2.append(vitorias2[-1])
             empates.append(empates[-1] + 1)
