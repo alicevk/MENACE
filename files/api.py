@@ -138,14 +138,48 @@ class Configuracao:
 
         return mapa
 
-    def create_choice_dict(self, initial_value=2):
-        """Cria dicionário com todas as as jogadas iniciadas com o mesmo valor."""
+    def create_choice_dict(self, initial_value=8, decay=2):
+        """Cria dicionário com todas as as jogadas iniciadas com o mesmo valor.
+
+        Args:
+          initial_value:
+            Inteiro que será o número de beads de cada posição permitida na
+            primeira rodada.
+          decay:
+            Taxa de perda de beads a cada rodada.
+
+        Returns:
+          Dicionário com posições como chaves e número de beads como valores.
+        """
+
+        self.get_symmetry_id()
+
+        # computa o número de beads desta rodada usando decay
+        num_empty = self.id_.count("0")
+        num_beads = 0
+        if num_empty >= 8:
+            # primeira jogada do jogador 1 ou 2
+            num_beads = initial_value
+        elif num_empty >= 6:
+            # segunda jogada do jogador 1 ou 2
+            num_beads = initial_value / decay
+        elif num_empty >= 4:
+            # terceira jogada do jogador 1 ou 2
+            num_beads = (initial_value / decay) / decay
+        elif num_empty >= 2:
+            # quarta jogada do jogador 1 ou 2
+            num_beads = ((initial_value / decay) / decay) / decay
+
+        num_beads = int(round(num_beads))
+        num_beads = num_beads if num_beads > 0 else 1
 
         # tem que converter para a posição padrão antes
-        self.get_symmetry_id()
         conf = Configuracao(self.id_)
         mapa = conf.symmetry_map()
-        choice_dict = {v: initial_value for v in set(mapa[mapa > 0])}
+
+        # preenche dicionário
+        choice_dict = {v: num_beads for v in set(mapa[mapa > 0])}
+
         return choice_dict
 
     def check_vitoria(self, jogador):
@@ -177,21 +211,27 @@ class Jogador:
         Quantidade de missangas adicionadas quando se ganha.
       reforco_derrota : int
         Quantidade de missangas adicionadas quando se perde.
+      reforco_empate : int
+        Quantidade de missangas adicionadas quando se empata.
     """
 
     def __init__(
         self,
         player_num=1,
-        valor_inicial=2,
+        valor_inicial=8,
         reforco_vitoria=3,
         reforco_derrota=-1,
+        reforco_empate=0,
+        decay_do_valor_inicial=2,
     ):
         assert valor_inicial > 0
         self.player_num = player_num
         self.valor_inicial = valor_inicial
+        self.decay_do_valor_inicial = decay_do_valor_inicial
         self.cria_dicionario_jogadas()
         self.reforco_vitoria = reforco_vitoria
         self.reforco_derrota = reforco_derrota
+        self.reforco_empate = reforco_empate
         self.jogadas = []
 
     def cria_dicionario_jogadas(self):
@@ -212,7 +252,9 @@ class Jogador:
             diff = 1
 
         jogos = {
-            jogo.get_symmetry_id(): jogo.create_choice_dict(self.valor_inicial)
+            jogo.get_symmetry_id(): jogo.create_choice_dict(
+                self.valor_inicial, self.decay_do_valor_inicial
+            )
             for jogo in map(Configuracao, product([0, 1, 2], repeat=9))
             if jogo.lista.count(1) - jogo.lista.count(2) == diff
             and not (jogo.check_vitoria(1) or jogo.check_vitoria(2))
@@ -221,8 +263,28 @@ class Jogador:
 
         self.brain = jogos
 
-    def realizar_jogada(self, config, verbose=False):
-        """Recebe uma configuração e retorna a configuração com jogada realizada"""
+    def realizar_jogada(self, config, verbose=False, return_prob=False):
+        """Recebe uma configuração e retorna a configuração com jogada realizada.
+
+        Args:
+          config:
+            Configuração atual do tabuleiro. Pode ser string ou instancia de
+            Configuracao.
+          verbose:
+            Se `True`, então printa informações da jogada. Para ser usado no
+            debug.
+          return_prob:
+            Se `True`, então além da jogada realizada, retorna um array com as
+            probabilidades que cada casa tinha de ser sorteada. Probabilidades
+            representadas em um número entre zero e um.
+
+        Return:
+          Se `return_prob=False` então retorna uma instância de Configuração com
+          a jogada já realizada. Se `return_prob=True`, então retorna
+          adicionalmente um array com as probabilidade de cada casa ser jogada
+          (probabilidades antes da jogada ser realizada).
+        """
+
         config = Configuracao(config) if isinstance(config, str) else config
         id_ = config.get_symmetry_id()
 
@@ -260,7 +322,24 @@ class Jogador:
             # registra jogo feito
             self.jogadas.append([dicionario, casa_escolhida])
 
-        return config_up
+        if return_prob:
+            # computa as chances de cada casa ser jogada
+            prob_cada_casa = np.zeros(9)
+
+            for i in range(9):
+                pos = mapa.ravel()[i]
+                prob_cada_casa[i] = dicionario[pos] if pos > 0 else 0
+
+            prob_cada_casa /= prob_cada_casa.sum()
+            prob_cada_casa = prob_cada_casa.reshape(3, 3)
+            prob_cada_casa = ALL_SYMMETRY_OP_INV[config.op_name](
+                prob_cada_casa
+            )
+
+            return config_up, prob_cada_casa
+
+        else:
+            return config_up
 
     def atualizar_vitoria(self):
         """Atualiza os dicionários de escolha em caso de vitória."""
@@ -283,6 +362,22 @@ class Jogador:
 
         for dicionario, casa_escolhida in self.jogadas:
             dicionario[casa_escolhida] += self.reforco_derrota
+
+            if dicionario[casa_escolhida] < 0:
+                dicionario[casa_escolhida] = 0
+
+            # se uma caixa está sem missangas, temos que resetá-la
+            if sum(list(dicionario.values())) <= 0:
+                for k in dicionario:
+                    dicionario[k] = self.valor_inicial
+
+        self.jogadas = []
+
+    def atualizar_empate(self):
+        """Atualiza os dicionários de escolha em caso de empate."""
+
+        for dicionario, casa_escolhida in self.jogadas:
+            dicionario[casa_escolhida] += self.reforco_empate
 
             if dicionario[casa_escolhida] < 0:
                 dicionario[casa_escolhida] = 0
@@ -328,6 +423,8 @@ def simulacao(player1, player2, num_jogos=100):
             empates.append(empates[-1])
 
         else:
+            jogadores[1].atualizar_empate()
+            jogadores[0].atualizar_empate()
             vitorias1.append(vitorias1[-1])
             vitorias2.append(vitorias2[-1])
             empates.append(empates[-1] + 1)
