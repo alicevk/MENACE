@@ -76,21 +76,22 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 print(menace.menace.brain)
-            if pausado and event.key in [pygame.K_RETURN, pygame.K_SPACE]:
+            if pausado and event.key == pygame.K_RETURN:
+                animacao_group.empty()
                 pausado[0] = False
     
-    print(pausado)
     if (player.isX) and (get_string(caixinhas_group) == '000000000') and (not pausado[0]):
         menace.jogada(caixinhas_group, lista_de_listas, animacao_group, pausado)
 
     # Updates:
-    screen.blit(background,(0, 0))
+    if (not pausado[0]): screen.blit(background,(0, 0))
     
-    caixinhas_group.draw(screen)
-    caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas, animacao_group, pausado)
+    if (not pausado[0]):
+        caixinhas_group.draw(screen)
+        caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas, animacao_group, pausado)
     
-    Player_group.draw(screen)
-    Player_group.update()
+        Player_group.draw(screen)
+        Player_group.update()
     
     if (len(animacao_group) != 0) or (pausado[0]): screen.fill((0,0,0))
     if (len(animacao_group) == 0) and (pausado[0]): proximo_group.draw(screen)

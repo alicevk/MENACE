@@ -12,6 +12,7 @@ scale_factor = 10 # so every sprite has the same scale
 brain_save_path = 'files/assets/brain.pickle'
 display_center = (640, 480)
 
+
 # ------------------------------------ Functions
 def get_sprites(size, file):
     '''
@@ -59,7 +60,7 @@ def vitoria(quem_ganhou, lista_de_listas, grupo_caixas, anim_grupo, pausado, men
         # Animação:
         cena_voce_ganhou = CenaAnimada(display_center,(78, 20),'spr_voceVenceu.png')
         anim_grupo.add(cena_voce_ganhou)
-        cena_voce_ganhou.animando = 30
+        cena_voce_ganhou.animando = 20
         print('Você ganhou!')
     else:
         quem_ganhou.atualizar_vitoria()
@@ -68,7 +69,7 @@ def vitoria(quem_ganhou, lista_de_listas, grupo_caixas, anim_grupo, pausado, men
         # Animação:
         cena_voce_perdeu = CenaAnimada(display_center,(78, 20),'spr_vocePerdeu.png')
         anim_grupo.add(cena_voce_perdeu)
-        cena_voce_perdeu.animando = 30
+        cena_voce_perdeu.animando = 20
         print('MENACE ganhou!')        
     lista_empates.append(lista_empates[-1])
     reset_game(grupo_caixas)
@@ -84,7 +85,7 @@ def empate(lista_de_listas, grupo_caixas, anim_grupo, pausado):
     # Animação:
     cena_empate = CenaAnimada(display_center,(78, 20),'spr_empate.png')
     anim_grupo.add(cena_empate)
-    cena_empate.animando = 30
+    cena_empate.animando = 20
     print('Empate!')
     reset_game(grupo_caixas)
     print(lista_de_listas)
@@ -220,3 +221,10 @@ class CenaAnimada(pygame.sprite.Sprite):
         else: self.kill()
         if self.count >= len(self.sprites): self.count = 0
         self.image = self.sprites[int(self.count)]
+        
+class Probabilidades():
+    def __init__(self, text, xy):
+        self.font = pygame.font.Font('files/assets/basis33.ttf', 32)
+        self.text = self.font.render(text, True, (0,0,0), (255,255,255))
+        self.rect = self.text.get_rect()
+        self.rect.center = xy
