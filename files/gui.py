@@ -114,7 +114,38 @@ def empate(lista_de_listas, grupo_caixas, anim_grupo, pausado):
 def reset_game(grupo_caixas):
     for caixa in grupo_caixas:
         caixa.change_value(0)
-        
+
+
+def konami(events, current):
+    exit = ['u', 'u', 'd', 'd', 'l', 'r', 'l', 'r', 'b', 'a']
+
+    for e in events:
+        if e.type == pygame.KEYDOWN:
+            if e.key == pygame.K_UP:
+                del current[0]
+                current.append('u')
+            elif e.key == pygame.K_DOWN:
+                del current[0]
+                current.append('d')
+            elif e.key == pygame.K_LEFT:
+                del current[0]
+                current.append('l')
+            elif e.key == pygame.K_RIGHT:
+                del current[0]
+                current.append('r')
+            elif e.key == pygame.K_b:
+                del current[0]
+                current.append('b')
+            elif e.key == pygame.K_a:
+                del current[0]
+                current.append('a')
+    
+    if (''.join(exit) == ''.join(current)):
+        return True
+    else:
+        return current
+
+
 
 # ------------------------------------ Classes        
 class Caixinhas(pygame.sprite.Sprite):

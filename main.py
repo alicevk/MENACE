@@ -20,6 +20,8 @@ pausado = [False]
 pygame.event.set_allowed([pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEBUTTONDOWN])
 font = pygame.font.Font('files/assets/basis33.ttf', 50)
 
+lista_konami = ['0' for _ in range(10)]
+
 # Janela:
 screen = pygame.display.set_mode((DISPLAY_W, DISPLAY_H),pygame.FULLSCREEN|pygame.SCALED)
 pygame.display.set_caption('MENACE')
@@ -76,14 +78,17 @@ for i in range(9):
 while running:
     events = pygame.event.get()
     
+    lista_konami = konami(events, lista_konami)
+    if lista_konami == True:
+        menace.save_pickle()
+        running = False
+
     # Close event check:
     for event in events:
         if event.type == pygame.QUIT:
             menace.save_pickle()
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key ==pygame.K_k:
-                pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
             if event.key == pygame.K_r:
                 pausado[0] = True
                 reset_game(caixinhas_group)
