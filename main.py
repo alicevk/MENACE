@@ -16,6 +16,7 @@ pygame.init()
 clock = pygame.time.Clock()
 running = True
 FPS = 60
+pausado = [False]
 
 # Janela:
 DISPLAY_W, DISPLAY_H = 1280, 960
@@ -46,6 +47,14 @@ menace = Menace(not player.isX)
 
 # Animação:
 animacao_group = pygame.sprite.Group()
+proximo_group = pygame.sprite.GroupSingle()
+
+proximo = pygame.sprite.Sprite()
+proximo.image = pygame.image.load('files/assets/sprites/spr_proximo.png').convert_alpha()
+proximo.image = pygame.transform.scale_by(proximo.image, scale_factor)
+proximo.rect = proximo.image.get_rect()
+proximo.rect.center = display_center
+proximo_group.add(proximo)
 
 # Caixinhas:
 caixinhas_group = pygame.sprite.Group()
@@ -53,6 +62,7 @@ caixinhas_group = pygame.sprite.Group()
 for i in range(9):
     caixinha_nova = Caixinhas(player,i+1)
     caixinhas_group.add(caixinha_nova)
+
 
 # ------------------------------------ Loop do jogo
 while running:
@@ -66,20 +76,24 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 print(menace.menace.brain)
+            if pausado and event.key in [pygame.K_RETURN, pygame.K_SPACE]:
+                pausado[0] = False
     
-    if player.isX and get_string(caixinhas_group) == '000000000':
-        menace.jogada(caixinhas_group, lista_de_listas, animacao_group)
+    print(pausado)
+    if (player.isX) and (get_string(caixinhas_group) == '000000000') and (not pausado[0]):
+        menace.jogada(caixinhas_group, lista_de_listas, animacao_group, pausado)
 
     # Updates:
     screen.blit(background,(0, 0))
     
     caixinhas_group.draw(screen)
-    caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas, animacao_group)
+    caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas, animacao_group, pausado)
     
     Player_group.draw(screen)
     Player_group.update()
     
-    if len(animacao_group) != 0: screen.fill((0,0,0))
+    if (len(animacao_group) != 0) or (pausado[0]): screen.fill((0,0,0))
+    if (len(animacao_group) == 0) and (pausado[0]): proximo_group.draw(screen)
     
     animacao_group.draw(screen)
     animacao_group.update()
