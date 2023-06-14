@@ -76,6 +76,9 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 print(menace.menace.brain)
+            if event.key == pygame.K_r:
+                pausado[0] = True
+                reset_game(caixinhas_group)
             if pausado and event.key == pygame.K_RETURN:
                 animacao_group.empty()
                 pausado[0] = False
