@@ -233,6 +233,7 @@ class Jogador:
         self.reforco_derrota = reforco_derrota
         self.reforco_empate = reforco_empate
         self.jogadas = []
+        self.num_jogos = 0
 
     def cria_dicionario_jogadas(self):
         """Cria dicionário de todas as jogadas possíveis do jogador.
@@ -293,7 +294,7 @@ class Jogador:
             config_up = Configuracao(id_.replace("0", str(self.player_num)))
 
             if return_prob:
-                prop_cada_casa = np.zeros(3,3)
+                prop_cada_casa = np.zeros(3, 3)
                 logic = config.desencolhe() == 0
                 prop_cada_casa[logic] = 1
                 return config_up, prob_cada_casa
@@ -363,6 +364,7 @@ class Jogador:
                     dicionario[k] = self.valor_inicial
 
         self.jogadas = []
+        self.num_jogos += 1
 
     def atualizar_derrota(self):
         """Atualiza os dicionários de escolha em caso de derrota."""
@@ -379,6 +381,7 @@ class Jogador:
                     dicionario[k] = self.valor_inicial
 
         self.jogadas = []
+        self.num_jogos += 1
 
     def atualizar_empate(self):
         """Atualiza os dicionários de escolha em caso de empate."""
@@ -395,6 +398,7 @@ class Jogador:
                     dicionario[k] = self.valor_inicial
 
         self.jogadas = []
+        self.num_jogos += 1
 
 
 def simulacao(player1, player2, num_jogos=100):
