@@ -85,9 +85,6 @@ while running:
 
     # Close event check:
     for event in events:
-        if event.type == pygame.QUIT:
-            menace.save_pickle()
-            running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
                 pausado[0] = True
