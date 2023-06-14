@@ -21,7 +21,7 @@ pygame.event.set_allowed([pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEBUTTONDOWN])
 font = pygame.font.Font('files/assets/basis33.ttf', 50)
 
 # Janela:
-screen = pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
+screen = pygame.display.set_mode((DISPLAY_W, DISPLAY_H),pygame.FULLSCREEN|pygame.SCALED)
 pygame.display.set_caption('MENACE')
 icon = pygame.image.load('files/assets/icon.png')
 pygame.display.set_icon(icon)
@@ -82,15 +82,15 @@ while running:
             menace.save_pickle()
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_s:
-                print(menace.menace.brain)
+            if event.key ==pygame.K_k:
+                pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
             if event.key == pygame.K_r:
                 pausado[0] = True
                 reset_game(caixinhas_group)
                 menace.menace.jogadas = []
             if pausado and event.key == pygame.K_RETURN:
                 animacao_group.empty()
-                pausado[0] = False
+                pausado[0] = False 
     
     if (player.isX) and (get_string(caixinhas_group) == '000000000') and (not pausado[0]):
         menace.jogada(caixinhas_group, lista_de_listas, animacao_group, pausado, prob_group)
