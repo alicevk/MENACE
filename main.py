@@ -87,6 +87,7 @@ while running:
             if event.key == pygame.K_r:
                 pausado[0] = True
                 reset_game(caixinhas_group)
+                menace.menace.jogadas = []
             if pausado and event.key == pygame.K_RETURN:
                 animacao_group.empty()
                 pausado[0] = False
