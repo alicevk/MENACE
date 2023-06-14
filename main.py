@@ -17,9 +17,10 @@ clock = pygame.time.Clock()
 running = True
 FPS = 60
 pausado = [False]
+pygame.event.set_allowed([pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEBUTTONDOWN])
+font = pygame.font.Font('files/assets/basis33.ttf', 50)
 
 # Janela:
-DISPLAY_W, DISPLAY_H = 1280, 960
 screen = pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
 pygame.display.set_caption('MENACE')
 icon = pygame.image.load('files/assets/icon.png')
@@ -39,7 +40,7 @@ lista_de_listas = [vitorias_jogador, vitorias_menace, empates]
 # Player:
 Player_group = pygame.sprite.Group()
 
-player = Player(True, (100, 100))
+player = Player(isX_constant, (100, 100))
 Player_group.add(player)
 
 # Menace:
@@ -62,6 +63,13 @@ caixinhas_group = pygame.sprite.Group()
 for i in range(9):
     caixinha_nova = Caixinhas(player,i+1)
     caixinhas_group.add(caixinha_nova)
+    
+# Probabilidades:
+prob_group = pygame.sprite.Group()
+
+for i in range(9):
+    prob_nova = Probabilidades('0%',i+1,screen,font)
+    prob_group.add(prob_nova)
 
 
 # ------------------------------------ Loop do jogo
@@ -76,19 +84,22 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 print(menace.menace.brain)
+            if event.key == pygame.K_r:
+                pausado[0] = True
+                reset_game(caixinhas_group)
             if pausado and event.key == pygame.K_RETURN:
                 animacao_group.empty()
                 pausado[0] = False
     
     if (player.isX) and (get_string(caixinhas_group) == '000000000') and (not pausado[0]):
-        menace.jogada(caixinhas_group, lista_de_listas, animacao_group, pausado)
+        menace.jogada(caixinhas_group, lista_de_listas, animacao_group, pausado, prob_group)
 
     # Updates:
     if (not pausado[0]): screen.blit(background,(0, 0))
     
     if (not pausado[0]):
         caixinhas_group.draw(screen)
-        caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas, animacao_group, pausado)
+        caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas, animacao_group, pausado, prob_group)
     
         Player_group.draw(screen)
         Player_group.update()
@@ -97,7 +108,11 @@ while running:
     if (len(animacao_group) == 0) and (pausado[0]): proximo_group.draw(screen)
     
     animacao_group.draw(screen)
-    animacao_group.update()
+    animacao_group.update(prob_group)
+    
+    if (not pausado[0]):
+        prob_group.draw(screen)
+        prob_group.update()
     
     pygame.display.update()
     clock.tick(FPS)

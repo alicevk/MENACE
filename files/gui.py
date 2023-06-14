@@ -5,12 +5,15 @@ implementação da interface gráfica do MENACE!
 :)
 """
 
+from time import sleep as s
 import pygame, pickle
 from files.api import *
 
 scale_factor = 10 # so every sprite has the same scale
 brain_save_path = 'files/assets/brain.pickle'
-display_center = (640, 480)
+DISPLAY_W, DISPLAY_H = 1280, 960
+display_center = (DISPLAY_W/2, DISPLAY_H/2)
+isX_constant = True
 
 
 # ------------------------------------ Functions
@@ -39,6 +42,16 @@ def get_sprites(size, file):
     return sprites
 
 
+def get_bead(num):
+    w, h = (6,4)
+    x, y = ((num-1)*w,0)
+    sheet = pygame.image.load('files/assets/sprites/spr_bead.png').convert_alpha()
+    sheet.set_clip(pygame.Rect(x, y, w, h))
+    sprite = sheet.subsurface(sheet.get_clip())
+    sprite = pygame.transform.scale_by(sprite, scale_factor)
+    return sprite
+
+
 def get_string(grupo_caixas):
     saida = ''
     for caixa in grupo_caixas:
@@ -46,7 +59,11 @@ def get_string(grupo_caixas):
     return saida
 
 
-def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual):
+def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual, prob, grupo_probs):
+    print(prob, grupo_probs)
+    for n, sprite in enumerate(grupo_probs):
+        probabilidade = prob[n]
+        sprite.text = sprite.font.render(f'{probabilidade*100:.2f}%', True, (255,255,255))
     for caixa, valor_antigo, valor_atual in zip(grupo_caixas, jogada_antiga, jogada_atual.lista):
         if valor_antigo != str(valor_atual): caixa.change_value(valor_atual)
         
@@ -72,6 +89,7 @@ def vitoria(quem_ganhou, lista_de_listas, grupo_caixas, anim_grupo, pausado, men
         cena_voce_perdeu.animando = 20
         print('MENACE ganhou!')        
     lista_empates.append(lista_empates[-1])
+    s(1)
     reset_game(grupo_caixas)
     print(lista_de_listas)
     pausado[0] = True
@@ -87,6 +105,7 @@ def empate(lista_de_listas, grupo_caixas, anim_grupo, pausado):
     anim_grupo.add(cena_empate)
     cena_empate.animando = 20
     print('Empate!')
+    s(1)
     reset_game(grupo_caixas)
     print(lista_de_listas)
     pausado[0] = True
@@ -133,16 +152,17 @@ class Caixinhas(pygame.sprite.Sprite):
         }
         self.rect.center = caixinhaDict[self.num]
         
-    def update(self, events, menace, grupo_caixas, lista_de_listas, anim_grupo, pausado):
+    def update(self, events, menace, grupo_caixas, lista_de_listas, anim_grupo, pausado, grupo_probs):
         if self.image == self.sprites[2] or self.image == self.sprites[3]:
             return
         mouse_pos = pygame.mouse.get_pos()
         hover = self.rect.collidepoint(mouse_pos)
         self.image = self.sprites[1] if hover else self.sprites[0]
+        # Checa jogada:
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and hover:
-                self.change_value(self.mouse.isX+1)
-                menace.jogada(grupo_caixas, lista_de_listas, anim_grupo, pausado)
+                self.change_value(isX_constant+1)
+                menace.jogada(grupo_caixas, lista_de_listas, anim_grupo, pausado, grupo_probs)
         
             
     def change_value(self, valor):
@@ -177,7 +197,7 @@ class Menace(OsAndXs):
         self.verbose = verbose
         self.menace = Jogador(isX+1)
     
-    def jogada(self, grupo_caixas, lista_de_listas, anim_grupo, pausado):
+    def jogada(self, grupo_caixas, lista_de_listas, anim_grupo, pausado, grupo_probs):
         # Jogada:
         estado_jogo = get_string(grupo_caixas)
         config = Configuracao(estado_jogo)
@@ -186,15 +206,16 @@ class Menace(OsAndXs):
             and (not config.check_vitoria(2))
             and (config.get_symmetry_id().count("0") > 0)
         ):
-            config = self.menace.realizar_jogada(estado_jogo, self.verbose)
-            atualizar_tela(grupo_caixas, estado_jogo, config)
+            config, prob = self.menace.realizar_jogada(estado_jogo, self.verbose, True)
+            prob = prob.ravel()
+            atualizar_tela(grupo_caixas, estado_jogo, config, prob, grupo_probs)
         # Check vitória, empate, etc.:
         if config.check_vitoria(self.isX+1): vitoria(self.menace, lista_de_listas, grupo_caixas, anim_grupo, pausado)
         elif config.check_vitoria((not self.isX)+1): vitoria('p', lista_de_listas, grupo_caixas, anim_grupo, pausado, self.menace)
         elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas, grupo_caixas, anim_grupo, pausado)
         else:
             # Animação:
-            cena_embaralhando = CenaAnimada(display_center,(70, 70),'spr_embaralhando.png')
+            cena_embaralhando = CenaAnimada((2/5 * DISPLAY_W, DISPLAY_H/2),(70, 70),'spr_embaralhando.png')
             anim_grupo.add(cena_embaralhando)
             cena_embaralhando.animando = 15
     
@@ -213,18 +234,28 @@ class CenaAnimada(pygame.sprite.Sprite):
         self.count = 0
         self.animando = 0
     
-    def update(self):
+    def update(self, grupo_prob):
         if self.animando >= 0:
-            buff = .25
+            buff = .2
             self.count += buff
             self.animando -= buff
         else: self.kill()
         if self.count >= len(self.sprites): self.count = 0
         self.image = self.sprites[int(self.count)]
+
+                
+class Probabilidades(pygame.sprite.Sprite):
+    def __init__(self, text, num, display, font):
+        super().__init__()
+        self.font = font
+        self.display = display
+        self.num = num
+        self.text = self.font.render(text, True, (255,255,255))
+        self.prob_rect = self.text.get_rect()
+        self.prob_rect.center = (3/4 * DISPLAY_W, DISPLAY_H/10 * num)
+        self.image = get_bead(num)
+        self.rect = self.image.get_rect()
+        self.rect.center = (3/4 * DISPLAY_W - 70, DISPLAY_H/10 * num)
         
-class Probabilidades():
-    def __init__(self, text, xy):
-        self.font = pygame.font.Font('files/assets/basis33.ttf', 32)
-        self.text = self.font.render(text, True, (0,0,0), (255,255,255))
-        self.rect = self.text.get_rect()
-        self.rect.center = xy
+    def update(self):
+        self.display.blit(self.text, self.prob_rect)
