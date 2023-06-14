@@ -292,6 +292,14 @@ class Jogador:
             # apenas uma jogada a ser feita, não temos escolha
             config_up = Configuracao(id_.replace("0", str(self.player_num)))
 
+            if return_prob:
+                prop_cada_casa = np.zeros(3,3)
+                logic = config.desencolhe() == 0
+                prop_cada_casa[logic] = 1
+                return config_up, prob_cada_casa
+            else:
+                return config_up
+
         else:
             dicionario = self.brain[id_]
             posicoes = list(dicionario.keys())
@@ -322,24 +330,23 @@ class Jogador:
             # registra jogo feito
             self.jogadas.append([dicionario, casa_escolhida])
 
-        if return_prob:
-            # computa as chances de cada casa ser jogada
-            prob_cada_casa = np.zeros(9)
+            if return_prob:
+                # computa as chances de cada casa ser jogada
+                prob_cada_casa = np.zeros(9)
 
-            for i in range(9):
-                pos = mapa.ravel()[i]
-                prob_cada_casa[i] = dicionario[pos] if pos > 0 else 0
+                for i in range(9):
+                    pos = mapa.ravel()[i]
+                    prob_cada_casa[i] = dicionario[pos] if pos > 0 else 0
 
-            prob_cada_casa /= prob_cada_casa.sum()
-            prob_cada_casa = prob_cada_casa.reshape(3, 3)
-            prob_cada_casa = ALL_SYMMETRY_OP_INV[config.op_name](
-                prob_cada_casa
-            )
+                prob_cada_casa /= prob_cada_casa.sum()
+                prob_cada_casa = prob_cada_casa.reshape(3, 3)
+                prob_cada_casa = ALL_SYMMETRY_OP_INV[config.op_name](
+                    prob_cada_casa
+                )
 
-            return config_up, prob_cada_casa
-
-        else:
-            return config_up
+                return config_up, prob_cada_casa
+            else:
+                return config_up
 
     def atualizar_vitoria(self):
         """Atualiza os dicionários de escolha em caso de vitória."""
