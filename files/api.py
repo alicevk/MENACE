@@ -294,9 +294,9 @@ class Jogador:
             config_up = Configuracao(id_.replace("0", str(self.player_num)))
 
             if return_prob:
-                prop_cada_casa = np.zeros(3, 3)
+                prob_cada_casa = np.zeros((3, 3))
                 logic = config.desencolhe() == 0
-                prop_cada_casa[logic] = 1
+                prob_cada_casa[logic] = 1
                 return config_up, prob_cada_casa
             else:
                 return config_up

@@ -60,7 +60,6 @@ def get_string(grupo_caixas):
 
 
 def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual, prob, grupo_probs):
-    print(prob, grupo_probs)
     for n, sprite in enumerate(grupo_probs):
         probabilidade = prob[n]
         sprite.text = sprite.font.render(f'{probabilidade*100:.2f}%', True, (255,255,255))
@@ -91,7 +90,6 @@ def vitoria(quem_ganhou, lista_de_listas, grupo_caixas, anim_grupo, pausado, men
     lista_empates.append(lista_empates[-1])
     s(1)
     reset_game(grupo_caixas)
-    print(lista_de_listas)
     pausado[0] = True
 
 
@@ -107,7 +105,6 @@ def empate(lista_de_listas, grupo_caixas, anim_grupo, pausado):
     print('Empate!')
     s(1)
     reset_game(grupo_caixas)
-    print(lista_de_listas)
     pausado[0] = True
 
 
