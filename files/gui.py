@@ -243,9 +243,11 @@ class Menace(OsAndXs):
         elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas, grupo_caixas, anim_grupo, pausado)
         else:
             # Animação:
-            cena_embaralhando = CenaAnimada((2/5 * DISPLAY_W, DISPLAY_H/2),(70, 70),'spr_embaralhando.png')
+            num = 1
+            cena_embaralhando = CenaAnimada((2/5 * DISPLAY_W - 50, DISPLAY_H/2 + 50),(100, 100),'spr_embaralhando.png')
+            cena_embaralhando.sprites.extend(get_sprites((100,100), f'files/assets/sprites/spr_opening_{num}.png'))
             anim_grupo.add(cena_embaralhando)
-            cena_embaralhando.animando = 15
+            cena_embaralhando.animando = len(cena_embaralhando.sprites)
     
     def save_pickle(self):
         with open(brain_save_path, 'wb') as handle:
@@ -258,7 +260,7 @@ class CenaAnimada(pygame.sprite.Sprite):
         self.sprites = get_sprites(size, 'files/assets/sprites/'+file)
         self.image = self.sprites[0]
         self.rect = self.image.get_rect()
-        self.rect.center = list(xy)
+        self.rect.center = xy
         self.count = 0
         self.animando = 0
     
@@ -280,10 +282,10 @@ class Probabilidades(pygame.sprite.Sprite):
         self.num = num
         self.text = self.font.render(text, True, (255,255,255))
         self.prob_rect = self.text.get_rect()
-        self.prob_rect.center = (3/4 * DISPLAY_W, DISPLAY_H/10 * num)
+        self.prob_rect.center = (4/5 * DISPLAY_W, DISPLAY_H/10 * num)
         self.image = get_bead(num)
         self.rect = self.image.get_rect()
-        self.rect.center = (3/4 * DISPLAY_W - 70, DISPLAY_H/10 * num)
+        self.rect.center = (4/5 * DISPLAY_W - 70, DISPLAY_H/10 * num)
         
     def update(self):
         self.display.blit(self.text, self.prob_rect)
