@@ -236,16 +236,20 @@ class Menace(OsAndXs):
         ):
             config, prob = self.menace.realizar_jogada(estado_jogo, self.verbose, True)
             prob = prob.ravel()
+            temp = estado_jogo
             atualizar_tela(grupo_caixas, estado_jogo, config, prob, grupo_probs)
+            self.casa_mudada = list(i != j for i, j in zip(get_string(grupo_caixas), temp))
+            self.casa_mudada = self.casa_mudada.index(True) + 1
         # Check vitória, empate, etc.:
         if config.check_vitoria(self.isX+1): vitoria(self.menace, lista_de_listas, grupo_caixas, anim_grupo, pausado)
         elif config.check_vitoria((not self.isX)+1): vitoria('p', lista_de_listas, grupo_caixas, anim_grupo, pausado, self.menace)
         elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas, grupo_caixas, anim_grupo, pausado)
         else:
             # Animação:
-            num = 1
+            num = self.casa_mudada
             cena_embaralhando = CenaAnimada((2/5 * DISPLAY_W - 50, DISPLAY_H/2 + 50),(100, 100),'spr_embaralhando.png')
             cena_embaralhando.sprites.extend(get_sprites((100,100), f'files/assets/sprites/spr_opening_{num}.png'))
+            cena_embaralhando.sprites.extend([cena_embaralhando.sprites[-1]]*5)
             anim_grupo.add(cena_embaralhando)
             cena_embaralhando.animando = len(cena_embaralhando.sprites)
     

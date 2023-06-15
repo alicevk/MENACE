@@ -113,9 +113,9 @@ while running:
     if (not pausado[0]):
         prob_group.draw(screen)
         prob_group.update()
-        
-        Player_group.draw(screen)
-        Player_group.update()
+        if (len(animacao_group) == 0):
+            Player_group.draw(screen)
+            Player_group.update()
     
     pygame.display.update()
     clock.tick(FPS)
