@@ -74,7 +74,7 @@ def vitoria(quem_ganhou, lista_de_listas, anim_grupo, pausado, menace=None):
         lista_jogador.append(lista_jogador[-1]+1)
         lista_menace.append(lista_menace[-1])
         # Animação:
-        cena_voce_ganhou = CenaAnimada(display_center,(78, 20),'spr_voceVenceu.png')
+        cena_voce_ganhou = CenaAnimada(display_center,(80, 22),'spr_voceVenceu.png')
         anim_grupo.add(cena_voce_ganhou)
         cena_voce_ganhou.animando = 60
         print('Você ganhou!')
@@ -83,7 +83,7 @@ def vitoria(quem_ganhou, lista_de_listas, anim_grupo, pausado, menace=None):
         lista_jogador.append(lista_jogador[-1])
         lista_menace.append(lista_menace[-1]+1)
         # Animação:
-        cena_voce_perdeu = CenaAnimada(display_center,(78, 20),'spr_vocePerdeu.png')
+        cena_voce_perdeu = CenaAnimada(display_center,(80, 22),'spr_vocePerdeu.png')
         anim_grupo.add(cena_voce_perdeu)
         cena_voce_perdeu.animando = 60
         print('MENACE ganhou!')        
@@ -98,7 +98,7 @@ def empate(lista_de_listas, anim_grupo, pausado):
     lista_menace.append(lista_menace[-1])
     lista_empates.append(lista_empates[-1] + 1)
     # Animação:
-    cena_empate = CenaAnimada(display_center,(78, 20),'spr_empate.png')
+    cena_empate = CenaAnimada(display_center,(80, 22),'spr_empate.png')
     anim_grupo.add(cena_empate)
     cena_empate.animando = 60
     print('Empate!')

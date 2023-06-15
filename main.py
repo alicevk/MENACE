@@ -27,7 +27,7 @@ screen = pygame.display.set_mode((DISPLAY_W, DISPLAY_H),pygame.FULLSCREEN|pygame
 pygame.display.set_caption('MENACE')
 icon = pygame.image.load('files/assets/icon.png')
 pygame.display.set_icon(icon)
-background = pygame.image.load('files/assets/sprites/bg.png')
+background = pygame.image.load('files/assets/sprites/bg_colorido.png')
 background = pygame.transform.scale_by(background, scale_factor)
 pygame.mouse.set_visible(False)
 
@@ -47,7 +47,7 @@ Player_group.add(player)
 
 # Menace:
 menace = Menace(not player.isX)
-menace.load_pickle()
+#menace.load_pickle()
 
 # Animação:
 animacao_group = pygame.sprite.Group()
@@ -120,15 +120,16 @@ while running:
     if ((len(animacao_group) != 0) or (pausado[0])) and (not pausado[1]): screen.fill((0,0,0))
     if ((len(animacao_group) == 0) and (pausado[0])) and (not pausado[1]): proximo_group.draw(screen)
     
-    animacao_group.draw(screen)
-    animacao_group.update(prob_group)
-    
     if (not pausado[0]) or (pausado[1]):
         prob_group.draw(screen)
         prob_group.update()
+        
         if (len(animacao_group) == 0):
             Player_group.draw(screen)
             Player_group.update()
+            
+    animacao_group.draw(screen)
+    animacao_group.update(prob_group)
     
     pygame.display.update()
     clock.tick(FPS)
