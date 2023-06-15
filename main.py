@@ -16,7 +16,7 @@ pygame.init()
 clock = pygame.time.Clock()
 running = True
 FPS = 60
-pausado = [False]
+pausado = [False, False]
 pygame.event.set_allowed([pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEBUTTONDOWN])
 font = pygame.font.Font('files/assets/basis33.ttf', 50)
 
@@ -90,30 +90,40 @@ while running:
             if event.key == pygame.K_p:
                 print(menace.menace.brain)
             if event.key == pygame.K_r:
+                animacao_group.empty()
                 pausado[0] = True
                 reset_game(caixinhas_group)
                 menace.menace.jogadas = []
             if pausado and event.key == pygame.K_RETURN:
                 animacao_group.empty()
-                pausado[0] = False 
+                pausado[0] = False
+                if pausado[1]:
+                    pausado[0] = True
+                    pausado[1] = False
+                    reset_game(caixinhas_group)
+    
+    if pausado[1]:
+        pausado[1] -= 1
+        if not pausado[1]:
+            reset_game(caixinhas_group)
     
     if (player.isX) and (get_string(caixinhas_group) == '000000000') and (not pausado[0]):
         menace.jogada(caixinhas_group, lista_de_listas, animacao_group, pausado, prob_group)
 
     # Updates:
-    if (not pausado[0]):
+    if (not pausado[0]) or (pausado[1]):
         screen.blit(background,(0, 0))
         
         caixinhas_group.draw(screen)
         caixinhas_group.update(events, menace, caixinhas_group, lista_de_listas, animacao_group, pausado, prob_group)
     
-    if (len(animacao_group) != 0) or (pausado[0]): screen.fill((0,0,0))
-    if (len(animacao_group) == 0) and (pausado[0]): proximo_group.draw(screen)
+    if ((len(animacao_group) != 0) or (pausado[0])) and (not pausado[1]): screen.fill((0,0,0))
+    if ((len(animacao_group) == 0) and (pausado[0])) and (not pausado[1]): proximo_group.draw(screen)
     
     animacao_group.draw(screen)
     animacao_group.update(prob_group)
     
-    if (not pausado[0]):
+    if (not pausado[0]) or (pausado[1]):
         prob_group.draw(screen)
         prob_group.update()
         if (len(animacao_group) == 0):

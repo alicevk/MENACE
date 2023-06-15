@@ -67,7 +67,7 @@ def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual, prob, grupo_probs)
         if valor_antigo != str(valor_atual): caixa.change_value(valor_atual)
         
         
-def vitoria(quem_ganhou, lista_de_listas, grupo_caixas, anim_grupo, pausado, menace=None):
+def vitoria(quem_ganhou, lista_de_listas, anim_grupo, pausado, menace=None):
     lista_jogador, lista_menace, lista_empates = lista_de_listas
     if quem_ganhou=='p':
         menace.atualizar_derrota()
@@ -76,7 +76,7 @@ def vitoria(quem_ganhou, lista_de_listas, grupo_caixas, anim_grupo, pausado, men
         # Animação:
         cena_voce_ganhou = CenaAnimada(display_center,(78, 20),'spr_voceVenceu.png')
         anim_grupo.add(cena_voce_ganhou)
-        cena_voce_ganhou.animando = 20
+        cena_voce_ganhou.animando = 60
         print('Você ganhou!')
     else:
         quem_ganhou.atualizar_vitoria()
@@ -85,15 +85,14 @@ def vitoria(quem_ganhou, lista_de_listas, grupo_caixas, anim_grupo, pausado, men
         # Animação:
         cena_voce_perdeu = CenaAnimada(display_center,(78, 20),'spr_vocePerdeu.png')
         anim_grupo.add(cena_voce_perdeu)
-        cena_voce_perdeu.animando = 20
+        cena_voce_perdeu.animando = 60
         print('MENACE ganhou!')        
     lista_empates.append(lista_empates[-1])
-    s(1)
-    reset_game(grupo_caixas)
     pausado[0] = True
+    pausado[1] = 300
 
 
-def empate(lista_de_listas, grupo_caixas, anim_grupo, pausado):
+def empate(lista_de_listas, anim_grupo, pausado):
     lista_jogador, lista_menace, lista_empates = lista_de_listas
     lista_jogador.append(lista_jogador[-1])
     lista_menace.append(lista_menace[-1])
@@ -101,11 +100,10 @@ def empate(lista_de_listas, grupo_caixas, anim_grupo, pausado):
     # Animação:
     cena_empate = CenaAnimada(display_center,(78, 20),'spr_empate.png')
     anim_grupo.add(cena_empate)
-    cena_empate.animando = 20
+    cena_empate.animando = 60
     print('Empate!')
-    s(1)
-    reset_game(grupo_caixas)
     pausado[0] = True
+    pausado[1] = 300
 
 
 def reset_game(grupo_caixas):
@@ -241,9 +239,9 @@ class Menace(OsAndXs):
             self.casa_mudada = list(i != j for i, j in zip(get_string(grupo_caixas), temp))
             self.casa_mudada = self.casa_mudada.index(True) + 1
         # Check vitória, empate, etc.:
-        if config.check_vitoria(self.isX+1): vitoria(self.menace, lista_de_listas, grupo_caixas, anim_grupo, pausado)
-        elif config.check_vitoria((not self.isX)+1): vitoria('p', lista_de_listas, grupo_caixas, anim_grupo, pausado, self.menace)
-        elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas, grupo_caixas, anim_grupo, pausado)
+        if config.check_vitoria(self.isX+1): vitoria(self.menace, lista_de_listas, anim_grupo, pausado)
+        elif config.check_vitoria((not self.isX)+1): vitoria('p', lista_de_listas, anim_grupo, pausado, self.menace)
+        elif config.get_symmetry_id().count("0") == 0: empate(lista_de_listas, anim_grupo, pausado)
         else:
             # Animação:
             num = self.casa_mudada
