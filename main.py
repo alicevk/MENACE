@@ -47,6 +47,7 @@ Player_group.add(player)
 
 # Menace:
 menace = Menace(not player.isX)
+menace.load_pickle()
 
 # Animação:
 animacao_group = pygame.sprite.Group()

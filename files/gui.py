@@ -256,6 +256,11 @@ class Menace(OsAndXs):
     def save_pickle(self):
         with open(brain_save_path, 'wb') as handle:
             pickle.dump(self.menace.brain, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            
+    def load_pickle(self):
+        with open(brain_save_path, 'rb') as handle:
+            loaded_brain = pickle.load(handle)
+            self.menace.brain = loaded_brain
         
 
 class CenaAnimada(pygame.sprite.Sprite):
