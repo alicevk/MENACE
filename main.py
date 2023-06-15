@@ -87,6 +87,8 @@ while running:
     # Close event check:
     for event in events:
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                print(menace.menace.brain)
             if event.key == pygame.K_r:
                 pausado[0] = True
                 reset_game(caixinhas_group)
