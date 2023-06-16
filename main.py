@@ -89,11 +89,12 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
                 print(menace.menace.brain)
-            if event.key == pygame.K_r:
+            if event.key == pygame.K_r and not pausado[0]:
                 animacao_group.empty()
                 pausado[0] = True
                 reset_game(caixinhas_group)
                 menace.menace.jogadas = []
+                mixer.stop()
             if pausado and event.key == pygame.K_RETURN:
                 animacao_group.empty()
                 pausado[0] = False
@@ -101,6 +102,7 @@ while running:
                     pausado[0] = True
                     pausado[1] = False
                     reset_game(caixinhas_group)
+                mixer.stop()
     
     if pausado[1]:
         pausado[1] -= 1
@@ -129,7 +131,7 @@ while running:
             Player_group.update()
             
     animacao_group.draw(screen)
-    animacao_group.update(prob_group)
+    animacao_group.update()
     
     pygame.display.update()
     clock.tick(FPS)

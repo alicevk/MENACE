@@ -8,12 +8,19 @@ implementação da interface gráfica do MENACE!
 from time import sleep as s
 import pygame, pickle
 from files.api import *
+from pygame import mixer
 
 scale_factor = 10 # so every sprite has the same scale
 brain_save_path = 'files/assets/brain.pickle'
 DISPLAY_W, DISPLAY_H = 1280, 960
 display_center = (DISPLAY_W/2, DISPLAY_H/2)
 isX_constant = True
+
+mixer.init()
+snd_bead = mixer.Sound('files/assets/audios/bead.mp3')
+snd_win = mixer.Sound('files/assets/audios/win.mp3')
+snd_lose = mixer.Sound('files/assets/audios/lose.mp3')
+snd_draw = mixer.Sound('files/assets/audios/draw.mp3')
 
 
 # ------------------------------------ Functions
@@ -68,6 +75,8 @@ def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual, prob, grupo_probs)
         
         
 def vitoria(quem_ganhou, lista_de_listas, anim_grupo, pausado, menace=None):
+    global snd_win, snd_lose
+
     lista_jogador, lista_menace, lista_empates = lista_de_listas
     if quem_ganhou=='p':
         menace.atualizar_derrota()
@@ -78,6 +87,7 @@ def vitoria(quem_ganhou, lista_de_listas, anim_grupo, pausado, menace=None):
         anim_grupo.add(cena_voce_ganhou)
         cena_voce_ganhou.animando = 60
         print('Você ganhou!')
+        snd_win.play()
     else:
         quem_ganhou.atualizar_vitoria()
         lista_jogador.append(lista_jogador[-1])
@@ -87,6 +97,7 @@ def vitoria(quem_ganhou, lista_de_listas, anim_grupo, pausado, menace=None):
         anim_grupo.add(cena_voce_perdeu)
         cena_voce_perdeu.animando = 60
         print('MENACE ganhou!')        
+        snd_lose.play()
     lista_empates.append(lista_empates[-1])
     pausado[0] = True
     pausado[1] = 300
@@ -104,6 +115,7 @@ def empate(lista_de_listas, anim_grupo, pausado):
     print('Empate!')
     pausado[0] = True
     pausado[1] = 300
+    snd_draw.play()
 
 
 def reset_game(grupo_caixas):
@@ -250,6 +262,7 @@ class Menace(OsAndXs):
             cena_embaralhando.sprites.extend([cena_embaralhando.sprites[-1]]*5)
             anim_grupo.add(cena_embaralhando)
             cena_embaralhando.animando = len(cena_embaralhando.sprites)
+            return True
     
     def save_pickle(self):
         with open(brain_save_path, 'wb') as handle:
@@ -271,7 +284,9 @@ class CenaAnimada(pygame.sprite.Sprite):
         self.count = 0
         self.animando = 0
     
-    def update(self, grupo_prob):
+    def update(self):
+        if (len(self.sprites) == 56) and (round(self.animando, 1) == 11.0):
+            snd_bead.play()
         if self.animando >= 0:
             buff = .2
             self.count += buff
