@@ -198,7 +198,7 @@ class Caixinhas(pygame.sprite.Sprite):
         self.image = self.sprites[1] if hover else self.sprites[0]
         # Checa jogada:
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN and hover:
+            if event.type == pygame.MOUSEBUTTONDOWN and hover and (not pausado[0]) and (not pausado[1]) and (len(anim_grupo)==0):
                 self.change_value(isX_constant+1)
                 menace.jogada(grupo_caixas, lista_de_listas, anim_grupo, pausado, grupo_probs)
         
