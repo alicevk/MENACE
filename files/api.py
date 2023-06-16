@@ -291,11 +291,13 @@ class Jogador:
 
         if id_.count("0") == 1:
             # apenas uma jogada a ser feita, não temos escolha
-            config_up = Configuracao(id_.replace("0", str(self.player_num)))
+            array = config.desencolhe()
+            logic = array == 0
+            array[logic] = self.player_num
+            config_up = Configuracao(array)
 
             if return_prob:
                 prob_cada_casa = np.zeros((3, 3))
-                logic = config.desencolhe() == 0
                 prob_cada_casa[logic] = 1
                 return config_up, prob_cada_casa
             else:
