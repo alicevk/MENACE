@@ -5,7 +5,7 @@ a biblioteca pygame.
 :)
 """
 
-
+# Importações
 import pygame, sys
 from files.gui import *
 from files.api import *
@@ -39,7 +39,7 @@ lista_de_listas = [vitorias_jogador, vitorias_menace, empates]
 
 
 # ------------------------------------ Instâncias e objetos 
-# Player:
+# Jogador:
 Player_group = pygame.sprite.Group()
 
 player = Player(isX_constant, (100, 100))
@@ -84,7 +84,7 @@ while running:
         menace.save_pickle()
         running = False
 
-    # Close event check:
+    # Checagem de eventos:
     for event in events:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
@@ -136,6 +136,6 @@ while running:
     pygame.display.update()
     clock.tick(FPS)
 
-    
+# Fecha loop do jogo:    
 pygame.quit()
 sys.exit()

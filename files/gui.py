@@ -4,18 +4,19 @@ implementação da interface gráfica do MENACE!
 
 :)
 """
-
-from time import sleep as s
+# Importações:
 import pygame, pickle
 from files.api import *
 from pygame import mixer
 
-scale_factor = 10 # so every sprite has the same scale
+# Utilidades:
+scale_factor = 10 # para os sprites
 brain_save_path = 'files/assets/brain.pickle'
 DISPLAY_W, DISPLAY_H = 1280, 960
 display_center = (DISPLAY_W/2, DISPLAY_H/2)
 isX_constant = True
 
+# Carregando os sons:
 mixer.init()
 snd_bead = mixer.Sound('files/assets/audios/bead.mp3')
 snd_win = mixer.Sound('files/assets/audios/win.mp3')
@@ -23,17 +24,17 @@ snd_lose = mixer.Sound('files/assets/audios/lose.mp3')
 snd_draw = mixer.Sound('files/assets/audios/draw.mp3')
 
 
-# ------------------------------------ Functions
+# ------------------------------------ Funções
 def get_sprites(size, file):
     '''
-    transforms a spritesheet image file into a list of individual pygame sprites.
+    Transforma uma imagem de spritesheet numa lista de sprites do pygame individuais.
 
     Args:
-        size (tup): (width, height)_of each individual sprite
-        file (str): path to spritesheet image
+        size (tup): (width, height) de cada sprite individual
+        file (str): local do arquivo da spritesheet
 
     Returns:
-        sprites (list): list of pygame surfaces/sprites
+        sprites (list): lista de superfícies/sprites do pygame
     '''
     w, h = size
     x, y = (0, 0)
@@ -50,6 +51,17 @@ def get_sprites(size, file):
 
 
 def get_bead(num):
+    '''
+    Devolve o sprite de uma miçanga a partir do seu número de identificação:
+        (1) = vermelho; (2) = laranja; (3) = amarelo; (4) = verde; (5) = azul claro;
+        (6) = azul escuro; (7) = roxo; (8) = rosa; e (9) = branco.
+
+    Args:
+        num (int): número de 1 a 9 para descrever a cor da miçanga
+
+    Returns:
+        sprite (pygame.Surface): superfície/sprite do pygame da miçanga
+    '''
     w, h = (6,4)
     x, y = ((num-1)*w,0)
     sheet = pygame.image.load('files/assets/sprites/spr_bead.png').convert_alpha()
@@ -60,6 +72,16 @@ def get_bead(num):
 
 
 def get_string(grupo_caixas):
+    '''
+    Devolve a configuração atual do tabuleiro em forma de string.
+
+    Args:
+        grupo_caixas (pygame.sprite.Group): grupo de caixas (objetos da classe Caixinhas,
+    do tipo pygame.sprite.Sprite) que descrevem o tabuleiro
+
+    Returns:
+        saida (str): string contendo a configuração atual do tabuleiro
+    '''
     saida = ''
     for caixa in grupo_caixas:
         saida += str(int(caixa.value))
@@ -67,6 +89,21 @@ def get_string(grupo_caixas):
 
 
 def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual, prob, grupo_probs):
+    '''
+    Atualiza os valores das probabilidades e os valores das caixinhas (tabuleiro).
+
+    Args:
+        grupo_caixas (pygame.sprite.Group): grupo de caixas (objetos da classe Caixinhas,
+    do tipo pygame.sprite.Sprite) que descrevem o tabuleiro
+        jogada_antiga (str): string representando a jogada anterior à atual.
+        jogada_atual (api.Configuracao): instância de Configuracao representando a
+    jogada atual
+        prob (arr): array com as probabilidades de cada casa ser jogada (antes da jogada)
+    ser realizada
+        grupo_probs (pygame.sprite.Group): grupo das probabilidades (instâncias da classe
+    Probabilidades; as quais incluem tanto os dados das probabilidades quanto os sprites
+    das miçangas)
+    '''
     for n, sprite in enumerate(grupo_probs):
         probabilidade = prob[n]
         sprite.text = sprite.font.render(f'{probabilidade*100:.2f}%', True, (255,255,255))
@@ -75,6 +112,20 @@ def atualizar_tela(grupo_caixas, jogada_antiga, jogada_atual, prob, grupo_probs)
         
         
 def vitoria(quem_ganhou, lista_de_listas, anim_grupo, pausado, menace=None):
+    '''
+    Função ativada quando alguém ganha; atualiza dados do menace e anima a cena
+    correspondente.
+
+    Args:
+        quem_ganhou: string 'p' caso o jogador tenha ganhado; instância do menace
+    caso omenace tenha ganhado
+        lista_de_listas (list): lista contendo as listas de vitória, derrota e empate
+        anim_grupo (pygame.sprite.Group): grupo de cenas animadas (instâncias da classe
+    CenaAnimada)
+        pausado (list): lista com os valores booleanos de pausa utilizados para animações 
+        menace (gui.Menace.menace, optional): instância do menace necessária caso o
+    ganhador seja o jogador; caso contrário, None
+    '''
     global snd_win, snd_lose
 
     lista_jogador, lista_menace, lista_empates = lista_de_listas
@@ -104,6 +155,15 @@ def vitoria(quem_ganhou, lista_de_listas, anim_grupo, pausado, menace=None):
 
 
 def empate(lista_de_listas, anim_grupo, pausado):
+    '''
+    Função ativada quando o jogo empata; atualiza dados do menace e anima a cena.
+
+    Args:
+        lista_de_listas (list): lista contendo as listas de vitória, derrota e empate
+        anim_grupo (pygame.sprite.Group): grupo de cenas animadas (instâncias da classe
+    CenaAnimada)
+        pausado (list): lista com os valores booleanos de pausa utilizados para animações 
+    '''
     lista_jogador, lista_menace, lista_empates = lista_de_listas
     lista_jogador.append(lista_jogador[-1])
     lista_menace.append(lista_menace[-1])
@@ -119,6 +179,13 @@ def empate(lista_de_listas, anim_grupo, pausado):
 
 
 def reset_game(grupo_caixas):
+    '''
+    Reseta o jogo, "zerando" as caixinhas do tabuleiro.
+
+    Args:
+        grupo_caixas (pygame.sprite.Group): grupo de caixas (objetos da classe Caixinhas,
+    do tipo pygame.sprite.Sprite) que descrevem o tabuleiro
+    '''
     for caixa in grupo_caixas:
         caixa.change_value(0)
 
