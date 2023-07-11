@@ -12,6 +12,7 @@ from pygame import mixer
 # Utilidades:
 scale_factor = 10 # para os sprites
 brain_save_path = 'files/assets/brain.pickle'
+history_save_path = 'files/assets/history.pickle'
 DISPLAY_W, DISPLAY_H = 1280, 960
 display_center = (DISPLAY_W/2, DISPLAY_H/2)
 isX_constant = True
@@ -331,14 +332,22 @@ class Menace(OsAndXs):
             cena_embaralhando.animando = len(cena_embaralhando.sprites)
             return True
     
-    def save_pickle(self):
+    def save_pickles(self, lista_de_listas):
         with open(brain_save_path, 'wb') as handle:
             pickle.dump(self.menace.brain, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        
+        with open(history_save_path, 'wb') as handle:
+            pickle.dump(lista_de_listas, handle, protocol=pickle.HIGHEST_PROTOCOL)
             
-    def load_pickle(self):
+    def load_pickles(self, lista_de_listas):
         with open(brain_save_path, 'rb') as handle:
             loaded_brain = pickle.load(handle)
             self.menace.brain = loaded_brain
+            
+        with open(history_save_path, 'rb') as handle:
+            loaded_history = pickle.load(handle)
+            lista_de_listas.clear()
+            lista_de_listas.extend(loaded_history)
         
 
 class CenaAnimada(pygame.sprite.Sprite):

@@ -19,6 +19,7 @@ FPS = 60
 pausado = [False, False]
 pygame.event.set_allowed([pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEBUTTONDOWN])
 font = pygame.font.Font('files/assets/basis33.ttf', 50)
+loading = True
 
 lista_konami = ['0' for _ in range(10)]
 
@@ -47,7 +48,7 @@ Player_group.add(player)
 
 # Menace:
 menace = Menace(not player.isX)
-menace.load_pickle()
+if loading: menace.load_pickles(lista_de_listas)
 
 # Animação:
 animacao_group = pygame.sprite.Group()
@@ -81,7 +82,7 @@ while running:
     
     lista_konami = konami(events, lista_konami)
     if lista_konami == True:
-        menace.save_pickle()
+        menace.save_pickles(lista_de_listas)
         running = False
 
     # Checagem de eventos:
@@ -89,6 +90,12 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
                 print(menace.menace.brain)
+            if event.key == pygame.K_h:
+                print(f"------------------------ \
+\n Vitórias do jogador: {lista_de_listas[0][-1]} \n \
+\n Vitórias do MENACE: {lista_de_listas[1][-1]} \n \
+\n Empates: {lista_de_listas[2][-1]} \n \
+------------------------")
             if event.key == pygame.K_r and not pausado[0]:
                 animacao_group.empty()
                 pausado[0] = True
