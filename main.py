@@ -88,20 +88,24 @@ while running:
     # Checagem de eventos:
     for event in events:
         if event.type == pygame.KEYDOWN:
+            # Print brain (P)
             if event.key == pygame.K_p:
                 print(menace.menace.brain)
+            # Print histórico (H)
             if event.key == pygame.K_h:
                 print(f"------------------------ \
 \n Vitórias do jogador: {lista_de_listas[0][-1]} \n \
 \n Vitórias do MENACE: {lista_de_listas[1][-1]} \n \
 \n Empates: {lista_de_listas[2][-1]} \n \
 ------------------------")
+            # Recomeçar partida atual (R)
             if event.key == pygame.K_r and not pausado[0]:
                 animacao_group.empty()
                 pausado[0] = True
                 reset_game(caixinhas_group)
                 menace.menace.jogadas = []
                 mixer.stop()
+            # Continuar depois do final de uma partida (Enter)
             if pausado and event.key == pygame.K_RETURN:
                 animacao_group.empty()
                 pausado[0] = False

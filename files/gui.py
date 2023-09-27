@@ -192,6 +192,18 @@ def reset_game(grupo_caixas):
 
 
 def konami(events, current):
+    '''
+    Checa pelo input do Konami code.
+
+    Args:
+        events (list): lista de eventos intrínseca da biblioteca pygame
+        current (list): lista atual de progresso do konami code case o mesmo esteja sendo
+    digitado
+
+    Returns:
+        True, caso o código tenha sido digitado completa e corretamente;
+        a lista atual de progresso current atualizada, caso contrário
+    '''
     exit = ['u', 'u', 'd', 'd', 'l', 'r', 'l', 'r', 'b', 'a']
 
     for e in events:
@@ -225,15 +237,9 @@ def konami(events, current):
 # ------------------------------------ Classes        
 class Caixinhas(pygame.sprite.Sprite):
     '''
-    represent each position that can be chosen in the game. will change its value
-    when clicked on.
-    
-    Args:
-        mouse (object): player object (to get mouse/player identity O or X)
-        num (int): box number/position 1-9
+    Representa cada casa/posição no tabuleiro do jogo. Seu valor é alterado quando um
+    jogador interage com uma instância da mesma.
 
-    Returns:
-        sprites (list): list of pygame surfaces/sprites
     '''
     def __init__(self, mouse, num):
         super().__init__()
@@ -270,7 +276,6 @@ class Caixinhas(pygame.sprite.Sprite):
                 self.change_value(isX_constant+1)
                 menace.jogada(grupo_caixas, lista_de_listas, anim_grupo, pausado, grupo_probs)
         
-            
     def change_value(self, valor):
         if valor==0:
             self.image = self.sprites[0]
@@ -279,6 +284,10 @@ class Caixinhas(pygame.sprite.Sprite):
 
 
 class OsAndXs(pygame.sprite.Sprite):
+    '''
+    Utilizada para objetos de X ou O no jogo.
+
+    '''
     def __init__(self, isX, xy=None):
         super().__init__()
         self.isX = isX
@@ -290,6 +299,10 @@ class OsAndXs(pygame.sprite.Sprite):
                     
  
 class Player(OsAndXs):
+    '''
+    Subclasse de OsAndXs utilizada que representa o jogador na tela.
+
+    '''
     def __init__(self, isX, xy=None):
         super().__init__(isX, xy)
         
@@ -298,6 +311,10 @@ class Player(OsAndXs):
 
      
 class Menace(OsAndXs):
+    '''
+    Subclasse de OsAndXs utilizada que representa o MENACE.
+
+    '''
     def __init__(self, isX, xy=None, verbose=False):
         super().__init__(isX, xy)
         self.verbose = verbose
@@ -351,6 +368,10 @@ class Menace(OsAndXs):
         
 
 class CenaAnimada(pygame.sprite.Sprite):
+    '''
+    Classe especial para cenas animadas utilizadas durante o jogo.
+    
+    '''
     def __init__(self, xy, size, file):
         super().__init__()
         self.sprites = get_sprites(size, 'files/assets/sprites/'+file)
@@ -373,6 +394,11 @@ class CenaAnimada(pygame.sprite.Sprite):
 
                 
 class Probabilidades(pygame.sprite.Sprite):
+    '''
+    Utilizada para plotar as probabilidades de cada jogada possível em determinada
+    configuração do tabuleiro.
+    
+    '''
     def __init__(self, text, num, display, font):
         super().__init__()
         self.font = font
