@@ -19,7 +19,7 @@ FPS = 60
 pausado = [False, False]
 pygame.event.set_allowed([pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEBUTTONDOWN])
 font = pygame.font.Font('files/assets/basis33.ttf', 50)
-loading = True
+loading = False
 
 lista_konami = ['0' for _ in range(10)]
 
