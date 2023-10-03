@@ -445,7 +445,7 @@ def simulacao(player1, player2, num_jogos=100):
     return player1, player2, vitorias1, vitorias2, empates
 
 
-def plot(vitorias1, vitorias2, empates, plot_name="", show=False):
+def plot(vitorias1, vitorias2, empates, plot_name="", show=False, label1="Vitórias 1", label2="Vitórias 2"):
     fig, axe = plt.subplots(
         ncols=1,
         nrows=1,
@@ -455,8 +455,8 @@ def plot(vitorias1, vitorias2, empates, plot_name="", show=False):
 
     x = list(range(1, len(vitorias1)))
 
-    axe.plot(x, vitorias1[1:], label="Vitórias 1")
-    axe.plot(x, vitorias2[1:], label="Vitórias 2")
+    axe.plot(x, vitorias1[1:], label=label1)
+    axe.plot(x, vitorias2[1:], label=label2)
     axe.plot(x, empates[1:], label="Empates")
 
     axe.set_xlabel("Jogo")
