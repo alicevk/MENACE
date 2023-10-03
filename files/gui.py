@@ -4,12 +4,16 @@ implementação da interface gráfica do MENACE!
 
 :)
 """
-# Importações:
+# ---------------------------------------------------------------------------- #
+#                                     Setup                                    #
+# ---------------------------------------------------------------------------- #
+
+# ------------------------------- Importações: ------------------------------- #
 import pygame, pickle
 from files.api import *
 from pygame import mixer
 
-# Utilidades:
+# -------------------------------- Utilidades: ------------------------------- #
 scale_factor = 10 # para os sprites
 brain_save_path = 'files/assets/brain.pickle'
 history_save_path = 'files/assets/history.pickle'
@@ -17,7 +21,7 @@ DISPLAY_W, DISPLAY_H = 1280, 960
 display_center = (DISPLAY_W/2, DISPLAY_H/2)
 isX_constant = True
 
-# Carregando os sons:
+# ---------------------------- Carregando os sons: --------------------------- #
 mixer.init()
 snd_bead = mixer.Sound('files/assets/audios/bead.mp3')
 snd_win = mixer.Sound('files/assets/audios/win.mp3')
@@ -25,7 +29,10 @@ snd_lose = mixer.Sound('files/assets/audios/lose.mp3')
 snd_draw = mixer.Sound('files/assets/audios/draw.mp3')
 
 
-# ------------------------------------ Funções
+# ---------------------------------------------------------------------------- #
+#                                    Funções                                   #
+# ---------------------------------------------------------------------------- #
+
 def get_sprites(size, file):
     '''
     Transforma uma imagem de spritesheet numa lista de sprites do pygame individuais.
@@ -234,7 +241,10 @@ def konami(events, current):
 
 
 
-# ------------------------------------ Classes        
+# ---------------------------------------------------------------------------- #
+#                                    Classes                                   #
+# ---------------------------------------------------------------------------- #
+
 class Caixinhas(pygame.sprite.Sprite):
     '''
     Representa cada casa/posição no tabuleiro do jogo. Seu valor é alterado quando um

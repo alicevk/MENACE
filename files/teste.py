@@ -1,4 +1,4 @@
-from files.api import Jogador, simulacao, plot
+from api import Jogador, simulacao, plot
 from pprint import pprint
 import numpy as np
 
