@@ -4,12 +4,12 @@ O MENACE já foi treinado em diversas ocasiões, em diferentes máquinas, por di
 
 |                   Identificação                  |            Evento           |           Base            | Quem joga primeiro |
 |:------------------------------------------------:|:---------------------------:|:-------------------------:|:------------------:|
-|  [CA A](./files/assets/dados/brain_CA_A.pickle)  |     Ciência Aberta 2023     |             -             |       MENACE       |
-|  [CA J](./files/assets/dados/brain_CA_J.pickle)  |     Ciência Aberta 2023     |             -             |       MENACE       |
-| [IPA A](./files/assets/dados/brain_IPA_A.pickle) | Ilum de Portas Abertas 2023 | [CA A](brain_CA_A.pickle) |       MENACE       |
-| [IPA D](./files/assets/dados/brain_IPA_D.pickle) | Ilum de Portas Abertas 2023 |             -             |       MENACE       |
-| [IPA J](./files/assets/dados/brain_IPA_J.pickle) | Ilum de Portas Abertas 2023 |             -             |       jogador      |
-| [IPA T](./files/assets/dados/brain_IPA_T.pickle) | Ilum de Portas Abertas 2023 |             -             |       MENACE       |
+|  [CA.A](#ca-a-arquivo)  |     Ciência Aberta 2023     |             -             |       MENACE       |
+|  [CA.J](./files/assets/dados/brain_CA_J.pickle)  |     Ciência Aberta 2023     |             -             |       MENACE       |
+| [IPA.A](./files/assets/dados/brain_IPA_A.pickle) | Ilum de Portas Abertas 2023 | [CA.A](brain_CA_A.pickle) |       MENACE       |
+| [IPA.D](./files/assets/dados/brain_IPA_D.pickle) | Ilum de Portas Abertas 2023 |             -             |       MENACE       |
+| [IPA.J](./files/assets/dados/brain_IPA_J.pickle) | Ilum de Portas Abertas 2023 |             -             |       jogador      |
+| [IPA.T](./files/assets/dados/brain_IPA_T.pickle) | Ilum de Portas Abertas 2023 |             -             |       MENACE       |
 
 
 <hr>
@@ -17,16 +17,50 @@ O MENACE já foi treinado em diversas ocasiões, em diferentes máquinas, por di
 
 ## Visão mais detalhada
 
-* [CA A](brain_CA_A.pickle): Treinado do zero durante o evento Ciência Aberta do CNPEM em junho de 2023 (Linux) - MENACE realiza a primeira jogada;
+#### CA.A [(.pickle)](brain_CA_A.pickle):
 
-* [CA J](brain_CA_B.pickle): Treinado do zero durante o evento Ciência Aberta do CNPEM em junho de 2023 (Windows) - MENACE realiza a primeira jogada;
+Treinado do zero durante o evento Ciência Aberta do CNPEM em junho de 2023 (Linux) - MENACE realiza a primeira jogada;
 
-* [IPA A](brain_IPA_A.pickle): Treinado com base no [CA A](brain_CA_A.pickle) durante o evento Ilum de Portas Abertas em setembro de 2023 (Linux) - MENACE realiza a primeira jogada;
+<hr>
 
-* [IPA D](brain_IPA_D.pickle): Treinado do zero durante o evento Ilum de Portas Abertas em setembro de 2023 (Linux) - MENACE realiza a primeira jogada;
+#### CA.J [(.pickle)](brain_CA_J.pickle):
 
-* [IPA J](brain_IPA_J.pickle): Treinado do zero durante o evento Ilum de Portas Abertas em setembro de 2023 (Linux) - o jogador realiza a primeira jogada;
+Treinado do zero durante o evento Ciência Aberta do CNPEM em junho de 2023 (Windows) - MENACE realiza a primeira jogada;
 
-* [IPA T](brain_IPA_T.pickle): Treinado do zero durante o evento Ilum de Portas Abertas em setembro de 2023 (Linux) - MENACE realiza a primeira jogada;
+<hr>
 
-## Desempenho e estatísticas
+#### IPA.A [(.pickle)](brain_IPA_A.pickle):
+
+Treinado com base no [CA A](#ca-a-pickle) durante o evento Ilum de Portas Abertas em setembro de 2023 (Linux) - MENACE realiza a primeira jogada;
+
+**Desempenho e estatísticas:**
+
+
+
+<hr>
+
+#### IPA.D [(.pickle)](brain_IPA_D.pickle):
+
+Treinado do zero durante o evento Ilum de Portas Abertas em setembro de 2023 (Linux) - MENACE realiza a primeira jogada;
+
+**Desempenho e estatísticas:**
+
+
+
+<hr>
+
+#### IPA J[(.pickle)](brain_IPA_J.pickle):
+
+Treinado do zero durante o evento Ilum de Portas Abertas em setembro de 2023 (Linux) - o jogador realiza a primeira jogada;
+
+**Desempenho e estatísticas:**
+
+
+
+<hr>
+
+#### IPA T [(.pickle)](brain_IPA_T.pickle):
+
+Treinado do zero durante o evento Ilum de Portas Abertas em setembro de 2023 (Linux) - MENACE realiza a primeira jogada.
+
+**Desempenho e estatísticas:**
